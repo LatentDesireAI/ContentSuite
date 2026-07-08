@@ -145,4 +145,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import multiprocessing
+
+    # PyInstaller: pool workers re-launch the .exe; only the main process may open the GUI.
+    multiprocessing.freeze_support()
+    if multiprocessing.current_process().name == "MainProcess":
+        raise SystemExit(main())

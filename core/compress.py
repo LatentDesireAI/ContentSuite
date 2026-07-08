@@ -5,8 +5,9 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import sys
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -216,6 +217,13 @@ def default_worker_count() -> int:
     return os.cpu_count() or 4
 
 
+def _pack_executor(workers: int):
+    """Process pool spawns new .exe instances under PyInstaller; use threads there."""
+    if getattr(sys, "frozen", False):
+        return ThreadPoolExecutor(max_workers=workers)
+    return ProcessPoolExecutor(max_workers=workers)
+
+
 def _process_task(args: tuple) -> ImageProcessResult:
     file_path, output_folder, output_name, index, quality, max_res, author_meta = args
     return process_single_image(
@@ -286,7 +294,7 @@ def process_pack(
         )
     ]
 
-    with ProcessPoolExecutor(max_workers=worker_count) as executor:
+    with _pack_executor(worker_count) as executor:
         for done, result in enumerate(executor.map(_process_task, tasks), start=1):
             summary.results.append(result)
 
