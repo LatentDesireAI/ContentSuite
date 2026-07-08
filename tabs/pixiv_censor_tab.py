@@ -70,11 +70,16 @@ class CensorBatchWorker(QThread):
                             source,
                             None,
                             False,
-                            "нет зон цензуры — откройте редактор",
+                            tr("log.censor.no_zones"),
                         )
                     )
                     self.log_line.emit(
-                        f"[{index}/{total}] {source.name} — пропуск: нет зон"
+                        tr(
+                            "log.censor.skip",
+                            cur=index,
+                            total=total,
+                            name=source.name,
+                        )
                     )
                     self.progress.emit(index, total)
                     continue
@@ -84,10 +89,21 @@ class CensorBatchWorker(QThread):
                 else:
                     out_name = f"{self.base_name}_{index}.mp4"
                 out_path = Path(self.output_dir) / "pixiv" / out_name
-                kind = "img" if is_image_path(source) else "vid"
+                kind = (
+                    tr("log.censor.kind_img")
+                    if is_image_path(source)
+                    else tr("log.censor.kind_vid")
+                )
                 self.log_line.emit(
-                    f"[{index}/{total}] {source.name} ({kind}) → pixiv/{out_name} "
-                    f"({len(zones)} зон)"
+                    tr(
+                        "log.censor.item",
+                        cur=index,
+                        total=total,
+                        name=source.name,
+                        kind=kind,
+                        out=out_name,
+                        zones=len(zones),
+                    )
                 )
 
                 if is_image_path(source):
@@ -318,7 +334,11 @@ class PixivCensorTab(BaseTab):
                 zones = self._store.get_zones(path)
                 if zones:
                     self.log(
-                        f"Цензура сохранена: {path.name} ({len(zones)} зон)"
+                        tr(
+                            "log.censor.saved",
+                            name=path.name,
+                            zones=len(zones),
+                        )
                     )
 
     def _start_export(self) -> None:
@@ -364,8 +384,12 @@ class PixivCensorTab(BaseTab):
         author_meta = self.config.get_author_metadata()
         self.log_panel.clear()
         self.log(
-            f"Pixiv цензура: {video_count} видео, {image_count} изображений | "
-            f"пак «{base_name}» → pixiv/"
+            tr(
+                "log.censor.start",
+                videos=video_count,
+                images=image_count,
+                pack=base_name,
+            )
         )
         self._set_busy(True)
         self.progress.setMaximum(len(sources))
@@ -397,9 +421,11 @@ class PixivCensorTab(BaseTab):
     def _on_finished(self, summary: VideoBatchSummary) -> None:
         self._set_busy(False)
         self.log("—" * 40)
-        self.log(f"Готово: {summary.processed} из {summary.total}")
+        self.log(
+            tr("log.done", done=summary.processed, total=summary.total)
+        )
         if summary.failed:
-            self.log(f"Пропущено/ошибок: {summary.failed}")
+            self.log(tr("log.skipped_failed", failed=summary.failed))
         out_root = Path(self.output_picker.path()) / "pixiv"
         QMessageBox.information(
             self,
@@ -414,5 +440,5 @@ class PixivCensorTab(BaseTab):
 
     def _on_error(self, message: str) -> None:
         self._set_busy(False)
-        self.log(f"Ошибка: {message}")
+        self.log(tr("log.error", msg=message))
         QMessageBox.critical(self, tr("common.content_suite"), message)

@@ -234,7 +234,7 @@ def build_censor_filter_complex(
     if not zones:
         return "", "[0:v]"
     if mask_count != len(zones):
-        raise FfmpegError("Число масок не совпадает с числом зон цензуры.")
+        raise FfmpegError("Mask count does not match censor zone count.")
 
     parts: list[str] = []
     current = "0:v"
@@ -270,7 +270,7 @@ def apply_video_censor(
     title: str = "",
 ) -> None:
     if not zones:
-        raise FfmpegError("Нет зон цензуры — откройте редактор и отметьте области.")
+        raise FfmpegError("No censor zones — open the editor and mark areas.")
 
     probe = probe_video(input_path)
     clamped = [z.clamp(probe.width, probe.height) for z in zones]
@@ -322,7 +322,7 @@ def apply_image_censor(
     author_meta: dict | None = None,
 ) -> None:
     if not zones:
-        raise FfmpegError("Нет зон цензуры — откройте редактор и отметьте области.")
+        raise FfmpegError("No censor zones — open the editor and mark areas.")
 
     with Image.open(input_path) as src:
         img = src.convert("RGB")

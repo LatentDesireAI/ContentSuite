@@ -86,10 +86,24 @@ class VideoBatchWorker(QThread):
                     prefix = result.source.name
                 if result.success:
                     out_name = result.output.name if result.output else "?"
-                    self.log_line.emit(f"[{current}/{total}] {prefix} → {out_name}")
+                    self.log_line.emit(
+                        tr(
+                            "log.video.item_ok",
+                            cur=current,
+                            total=total,
+                            prefix=prefix,
+                            out=out_name,
+                        )
+                    )
                 else:
                     self.log_line.emit(
-                        f"[{current}/{total}] {result.source.name} — ошибка: {result.message}"
+                        tr(
+                            "log.video.item_err",
+                            cur=current,
+                            total=total,
+                            name=result.source.name,
+                            error=result.message,
+                        )
                     )
 
             summary = process_video_batch(
@@ -147,7 +161,14 @@ class UgoiraBatchWorker(QThread):
                 )
                 get_logger().info("UgoiraWorker start: %s → %s", source.name, out_dir)
                 self.log_line.emit(
-                    f"Ugoira [{index}/{total}]: {source.name} → {folder_name}/ ({fps} fps)"
+                    tr(
+                        "log.video.ugoira_item",
+                        cur=index,
+                        total=total,
+                        name=source.name,
+                        folder=folder_name,
+                        fps=fps,
+                    )
                 )
                 result = export_ugoira(
                     source, out_dir, **filter_ugoira_options(self.options)
@@ -159,15 +180,24 @@ class UgoiraBatchWorker(QThread):
                         self.options.get("auto_fit_size", True)
                         and size_mb > max_mb + 0.05
                     )
+                    quality_note = (
+                        tr("log.video.ugoira_chunk_q", q=chunk.jpeg_quality)
+                        if chunk.jpeg_quality
+                        else ""
+                    )
+                    over_note = (
+                        tr("log.video.ugoira_over_limit") if over else ""
+                    )
                     self.log_line.emit(
-                        f"  {folder_name}/{chunk.frames_dir.name}: "
-                        f"{chunk.frame_count} кадров, {size_mb:.1f} МБ"
-                        + (
-                            f", JPEG q={chunk.jpeg_quality}"
-                            if chunk.jpeg_quality
-                            else ""
+                        tr(
+                            "log.video.ugoira_chunk",
+                            folder=folder_name,
+                            chunk=chunk.frames_dir.name,
+                            frames=chunk.frame_count,
+                            size=size_mb,
+                            quality=quality_note,
+                            over=over_note,
                         )
-                        + (" ⚠ выше лимита" if over else "")
                     )
                 results.append(result)
                 self.progress.emit(index, total)
@@ -390,7 +420,7 @@ class VideoTab(BaseTab):
         self.ugoira_chunk_spin = QSpinBox()
         self.ugoira_chunk_spin.setRange(3, 60)
         self.ugoira_chunk_spin.setValue(int(config.get("ugoira_chunk_sec", 10)))
-        self.ugoira_chunk_spin.setSuffix(" сек")
+        self.ugoira_chunk_spin.setSuffix(tr("unit.sec"))
         self.ugoira_chunk_spin.valueChanged.connect(
             lambda v: config.set("ugoira_chunk_sec", v)
         )
@@ -438,7 +468,7 @@ class VideoTab(BaseTab):
         self.ugoira_max_mb_spin = QSpinBox()
         self.ugoira_max_mb_spin.setRange(10, 50)
         self.ugoira_max_mb_spin.setValue(int(config.get("ugoira_max_chunk_mb", 30)))
-        self.ugoira_max_mb_spin.setSuffix(" МБ")
+        self.ugoira_max_mb_spin.setSuffix(tr("unit.mb"))
         self.ugoira_max_mb_spin.valueChanged.connect(
             lambda v: config.set("ugoira_max_chunk_mb", v)
         )
@@ -604,6 +634,8 @@ class VideoTab(BaseTab):
         self.metadata_btn.setText(tr("video.btn_metadata"))
 
         self._ugoira_group.setTitle(tr("video.ugoira_group"))
+        self.ugoira_chunk_spin.setSuffix(tr("unit.sec"))
+        self.ugoira_max_mb_spin.setSuffix(tr("unit.mb"))
         self._lbl_ugoira_chunk.setText(tr("video.ugoira_chunk"))
         self.ugoira_auto_fps_cb.setText(tr("video.ugoira_auto_fps"))
         self._lbl_ugoira_fps.setText(tr("video.ugoira_fps"))
@@ -827,7 +859,7 @@ class VideoTab(BaseTab):
     def _author_log_note(self) -> str:
         meta = self.config.get_author_metadata()
         if meta.get("enabled") and meta.get("author"):
-            return f", автор={meta['author']}"
+            return tr("log.author_suffix", author=meta["author"])
         return ""
 
     def _start_batch(
@@ -857,13 +889,22 @@ class VideoTab(BaseTab):
 
         job_kwargs = {**self._export_kwargs(), **job_kwargs}
         self.log_panel.clear()
+        author = self._author_log_note()
         if in_place:
-            self.log(f"{log_header}{self._author_log_note()}")
+            self.log(tr("log.batch_header_inplace", header=log_header, author=author))
         else:
             out_sub = job_output_dir(Path(output), job)
-            pack_note = f" | пак «{base_name}»" if base_name else ""
+            pack_note = (
+                tr("log.pack_suffix", pack=base_name) if base_name else ""
+            )
             self.log(
-                f"{log_header}{pack_note} → {out_sub.name}/{self._author_log_note()}"
+                tr(
+                    "log.batch_header",
+                    header=log_header,
+                    pack=pack_note,
+                    folder=out_sub.name,
+                    author=author,
+                )
             )
         self._set_busy(True)
         self.progress.setValue(0)
@@ -899,9 +940,13 @@ class VideoTab(BaseTab):
                 "watermark_settings": self._watermark_settings(),
                 "compression_level": level,
             },
-            f"Watermark: {wm_path.name} | высота={self.wm_height_spin.value()}%, "
-            f"alpha={self.wm_alpha_spin.value()}%, "
-            f"сжатие={tr(f'video.compress.{level}')}",
+            tr(
+                "log.video.watermark_start",
+                file=wm_path.name,
+                height=self.wm_height_spin.value(),
+                alpha=self.wm_alpha_spin.value(),
+                compression=tr(f"video.compress.{level}"),
+            ),
         )
 
     def _start_gif(self) -> None:
@@ -911,7 +956,11 @@ class VideoTab(BaseTab):
                 "fps": self.gif_fps_spin.value(),
                 "width": self.gif_width_spin.value(),
             },
-            f"GIF: fps={self.gif_fps_spin.value()}, ширина={self.gif_width_spin.value()}px",
+            tr(
+                "log.video.gif_start",
+                fps=self.gif_fps_spin.value(),
+                width=self.gif_width_spin.value(),
+            ),
         )
 
     def _start_metadata(self) -> None:
@@ -937,12 +986,25 @@ class VideoTab(BaseTab):
             return
 
         base_name = self.base_name_edit.text().strip()
-        mode = "на месте" if in_place else f"→ {job_output_dir(Path(output), 'metadata')}"
+        mode = (
+            tr("log.video.metadata_inplace")
+            if in_place
+            else f"→ {job_output_dir(Path(output), 'metadata')}"
+        )
+        pack_note = (
+            tr("log.pack_suffix", pack=base_name)
+            if base_name and not in_place
+            else ""
+        )
         self._start_batch(
             "metadata",
             {"in_place": in_place},
-            f"Авторство (copy): {len(sources)} файл(ов) {mode}"
-            + (f" | пак «{base_name}»" if base_name and not in_place else ""),
+            tr(
+                "log.video.metadata_start",
+                count=len(sources),
+                mode=mode,
+                pack=pack_note,
+            ),
             require_base_name=not in_place,
         )
 
@@ -958,9 +1020,17 @@ class VideoTab(BaseTab):
                 "reencode": self.reencode_cb.isChecked(),
                 "compression_level": level,
             },
-            f"Конвертация → {fmt} | сжатие={tr(f'video.compress.{level}')} | "
-            f"звук={'да' if self.keep_audio_cb.isChecked() else 'нет'}, "
-            f"метаданные={'удалить' if self.remove_meta_cb.isChecked() else 'оставить'}",
+            tr(
+                "log.video.convert_start",
+                fmt=fmt,
+                compression=tr(f"video.compress.{level}"),
+                audio=tr("log.yes")
+                if self.keep_audio_cb.isChecked()
+                else tr("log.no"),
+                metadata=tr("log.meta_remove")
+                if self.remove_meta_cb.isChecked()
+                else tr("log.meta_keep"),
+            ),
         )
 
     def _start_ugoira(self) -> None:
@@ -1005,19 +1075,26 @@ class VideoTab(BaseTab):
                 return
             options["watermark_path"] = wm_path
             options["watermark_settings"] = self._watermark_settings()
-            wm_note = f", watermark={wm_path.name}"
+            wm_note = tr("log.video.ugoira_wm", file=wm_path.name)
 
         self.log_panel.clear()
+        limit_note = (
+            tr("log.video.ugoira_limit", mb=self.ugoira_max_mb_spin.value())
+            if self.ugoira_auto_size_cb.isChecked()
+            else ""
+        )
         self.log(
-            f"Ugoira: {len(sources)} ролик(ов) | пак «{base_name}» → ugoira/ | "
-            f"chunk={chunk}s, fps={effective_fps}, max={max_frames}"
-            + (
-                f", лимит={self.ugoira_max_mb_spin.value()}МБ"
-                if self.ugoira_auto_size_cb.isChecked()
-                else ""
+            tr(
+                "log.video.ugoira_start",
+                count=len(sources),
+                pack=base_name,
+                chunk=chunk,
+                fps=effective_fps,
+                max_frames=max_frames,
+                limit=limit_note,
+                wm=wm_note,
+                author=self._author_log_note(),
             )
-            + wm_note
-            + f"{self._author_log_note()}"
         )
         self._set_busy(True)
         self.progress.setMaximum(len(sources))
@@ -1038,9 +1115,9 @@ class VideoTab(BaseTab):
     def _on_batch_finished(self, summary: VideoBatchSummary, job: str) -> None:
         self._set_busy(False)
         self.log("—" * 40)
-        self.log(f"Готово: {summary.processed} из {summary.total}")
+        self.log(tr("log.done", done=summary.processed, total=summary.total))
         if summary.failed:
-            self.log(f"Ошибок: {summary.failed}")
+            self.log(tr("log.errors_count", failed=summary.failed))
 
         labels = {
             "watermark": tr("video.done_watermark"),
@@ -1071,8 +1148,13 @@ class VideoTab(BaseTab):
         out_root = Path(self.output_picker.path()) / "ugoira"
         self.log("—" * 40)
         self.log(
-            f"Ugoira готов: {len(results)} ролик(ов), {total_chunks} ugoira-частей, "
-            f"{total_frames} кадров → {out_root}"
+            tr(
+                "log.video.ugoira_done",
+                clips=len(results),
+                chunks=total_chunks,
+                frames=total_frames,
+                path=out_root,
+            )
         )
         QMessageBox.information(
             self,
@@ -1088,5 +1170,5 @@ class VideoTab(BaseTab):
 
     def _on_error(self, message: str) -> None:
         self._set_busy(False)
-        self.log(f"Ошибка: {message}")
+        self.log(tr("log.error", msg=message))
         QMessageBox.critical(self, tr("common.content_suite"), message)

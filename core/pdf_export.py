@@ -50,10 +50,10 @@ def export_folder_to_pdf(
     image_files = collect_images(source_path)
 
     if not image_files:
-        raise ValueError("В выбранной папке нет изображений.")
+        raise ValueError("No images in the selected folder.")
 
     if not title.strip():
-        raise ValueError("Укажите имя пака для PDF.")
+        raise ValueError("Specify pack name for PDF.")
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 

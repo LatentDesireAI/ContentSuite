@@ -38,7 +38,7 @@ class Cell:
 def load_rgb(path: Path) -> Image.Image:
     path = Path(path)
     if not path.is_file():
-        raise FileNotFoundError(f"Файл не найден: {path}")
+        raise FileNotFoundError(f"File not found: {path}")
 
     with Image.open(path) as img:
         img.load()
@@ -141,7 +141,7 @@ def _cells_for_layout(layout: str, inner: int, gap: int) -> list[Cell]:
             Cell(left_w + gap, top_h + gap, right_w, bottom_h),
         ]
 
-    raise ValueError(f"Неизвестная раскладка: {layout}")
+    raise ValueError(f"Unknown layout: {layout}")
 
 
 def _prepare_tile(
@@ -151,7 +151,7 @@ def _prepare_tile(
     crop_fill: bool,
 ) -> tuple[Image.Image, int, int]:
     if img.width <= 0 or img.height <= 0:
-        raise ValueError("Изображение имеет нулевой размер.")
+        raise ValueError("Image has zero dimensions.")
 
     if crop_fill:
         scale = max(box_w / img.width, box_h / img.height)
@@ -211,9 +211,9 @@ def compose_cover(
     frame_color: str | tuple[int, int, int] = "#2d2d2d",
 ) -> tuple[Image.Image, str]:
     if not image_paths:
-        raise ValueError("Добавьте хотя бы одно изображение.")
+        raise ValueError("Add at least one image.")
     if len(image_paths) > 3:
-        raise ValueError("Максимум 3 изображения для превью Pixiv.")
+        raise ValueError("Maximum 3 images for Pixiv preview.")
 
     images = [load_rgb(Path(p)) for p in image_paths]
     resolved = resolve_layout(layout, len(images))

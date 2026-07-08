@@ -426,20 +426,31 @@ class ImagesTab(BaseTab):
         author_meta = self.config.get_author_metadata()
         meta_note = ""
         if author_meta.get("enabled") and author_meta.get("author"):
-            meta_note = f", автор={author_meta['author']}"
+            meta_note = tr("log.author_suffix", author=author_meta["author"])
         selected_note = ""
         if len(sources) < self.image_grid.count():
-            selected_note = f", выбрано {len(sources)} из {self.image_grid.count()}"
+            selected_note = tr(
+                "log.images.selected",
+                count=len(sources),
+                total=self.image_grid.count(),
+            )
         name_note = (
-            "оригинальные имена"
+            tr("log.images.name_original")
             if keep_original_name
-            else f"пак «{base_name}»"
+            else tr("log.images.name_pack", pack=base_name)
         )
         self.log(
-            f"Сжатие: {input_folder} → {output_folder} | "
-            f"{name_note}, quality={self.quality_spin.value()}, "
-            f"max={self.max_res_spin.value()}px, потоков={workers}"
-            f"{selected_note}{meta_note}"
+            tr(
+                "log.images.compress_start",
+                input=input_folder,
+                output=output_folder,
+                name_note=name_note,
+                quality=self.quality_spin.value(),
+                max=self.max_res_spin.value(),
+                workers=workers,
+                selected=selected_note,
+                author=meta_note,
+            )
         )
 
         self._set_busy(True)
@@ -487,9 +498,13 @@ class ImagesTab(BaseTab):
 
         self.log_panel.clear()
         self.log(
-            f"PDF: {source_folder} → {output_pdf} | "
-            f"страниц≈{len(collect_images(Path(source_folder)))}, "
-            f"dpi={self.pdf_dpi_spin.value()}"
+            tr(
+                "log.images.pdf_start",
+                input=source_folder,
+                output=output_pdf,
+                pages=len(collect_images(Path(source_folder))),
+                dpi=self.pdf_dpi_spin.value(),
+            )
         )
 
         self._set_busy(True)
@@ -528,13 +543,19 @@ class ImagesTab(BaseTab):
             pct = (1 - summary.output_bytes / summary.original_bytes) * 100
 
         self.log("—" * 40)
-        self.log(f"Готово: {summary.processed} из {summary.total_files}")
-        if summary.failed:
-            self.log(f"Ошибок: {summary.failed}")
         self.log(
-            f"Размер: {summary.original_bytes / 1024 / 1024:.1f} MB → "
-            f"{summary.output_bytes / 1024 / 1024:.1f} MB "
-            f"(−{saved_mb:.1f} MB, {pct:.0f}%)"
+            tr("log.done", done=summary.processed, total=summary.total_files)
+        )
+        if summary.failed:
+            self.log(tr("log.errors_count", failed=summary.failed))
+        self.log(
+            tr(
+                "log.images.size_summary",
+                before=summary.original_bytes / 1024 / 1024,
+                after=summary.output_bytes / 1024 / 1024,
+                saved=saved_mb,
+                pct=pct,
+            )
         )
 
         QMessageBox.information(
@@ -553,8 +574,12 @@ class ImagesTab(BaseTab):
 
         self.log("—" * 40)
         self.log(
-            f"PDF готов: {result.output_path.name} | "
-            f"{result.page_count} стр., {result.file_size / 1024 / 1024:.1f} MB"
+            tr(
+                "log.images.pdf_done_log",
+                name=result.output_path.name,
+                pages=result.page_count,
+                size=result.file_size / 1024 / 1024,
+            )
         )
 
         QMessageBox.information(

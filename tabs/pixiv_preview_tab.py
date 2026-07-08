@@ -395,7 +395,7 @@ class PixivPreviewTab(QWidget):
             pixmap = self._pil_to_pixmap(image)
             image.close()
             if pixmap.isNull():
-                raise RuntimeError("Не удалось построить превью.")
+                raise RuntimeError("Failed to build preview.")
 
             scaled = pixmap.scaled(
                 self.preview_label.size(),

@@ -352,7 +352,7 @@ class CensorEditorDialog(QDialog):
         if self.is_image:
             self.time_label.setText("")
         else:
-            self.time_label.setText(f"{self._time_sec:.1f} с")
+            self.time_label.setText(tr("unit.time_sec", value=self._time_sec))
 
     def _on_block_changed(self, value: int) -> None:
         self.canvas.set_block_size(value)
@@ -430,7 +430,7 @@ class CensorEditorDialog(QDialog):
                 pix = QPixmap(str(frame_path))
             self.canvas.set_frame(pix, self._media_w, self._media_h)
             if not self.is_image:
-                self.time_label.setText(f"{self._time_sec:.1f} с")
+                self.time_label.setText(tr("unit.time_sec", value=self._time_sec))
         except Exception as exc:
             QMessageBox.warning(
                 self,

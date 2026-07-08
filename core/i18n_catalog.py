@@ -34,6 +34,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         ),
         "common.dpi": "DPI",
         "common.fps": "FPS",
+        "unit.sec": " s",
+        "unit.mb": " MB",
+        "unit.time_sec": "{value:.1f} s",
         "common.not_selected": "(not selected)",
         "folder.placeholder": "Choose a folder…",
         "folder.dialog": "Choose folder — {label}",
@@ -287,6 +290,66 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.page": "[{cur}/{total}] page: {name}",
         "log.compress_error": "[{cur}/{total}] {name} — error: {error}",
         "log.resized": " resized",
+        "log.done": "Done: {done} of {total}",
+        "log.errors_count": "Errors: {failed}",
+        "log.skipped_failed": "Skipped/failed: {failed}",
+        "log.author_suffix": ", author={author}",
+        "log.pack_suffix": " | pack «{pack}»",
+        "log.batch_header": "{header}{pack} → {folder}/{author}",
+        "log.batch_header_inplace": "{header}{author}",
+        "log.yes": "yes",
+        "log.no": "no",
+        "log.meta_remove": "remove",
+        "log.meta_keep": "keep",
+        "log.censor.start": (
+            "Pixiv censor: {videos} video(s), {images} image(s) | pack «{pack}» → pixiv/"
+        ),
+        "log.censor.saved": "Censor saved: {name} ({zones} zone(s))",
+        "log.censor.skip": "[{cur}/{total}] {name} — skip: no zones",
+        "log.censor.item": (
+            "[{cur}/{total}] {name} ({kind}) → pixiv/{out} ({zones} zone(s))"
+        ),
+        "log.censor.kind_img": "img",
+        "log.censor.kind_vid": "vid",
+        "log.censor.no_zones": "no censor zones — open the editor",
+        "log.images.compress_start": (
+            "Compress: {input} → {output} | {name_note}, quality={quality}, "
+            "max={max}px, workers={workers}{selected}{author}"
+        ),
+        "log.images.name_original": "original filenames",
+        "log.images.name_pack": "pack «{pack}»",
+        "log.images.selected": ", selected {count} of {total}",
+        "log.images.size_summary": (
+            "Size: {before:.1f} MB → {after:.1f} MB (−{saved:.1f} MB, {pct:.0f}%)"
+        ),
+        "log.images.pdf_start": "PDF: {input} → {output} | pages≈{pages}, dpi={dpi}",
+        "log.images.pdf_done_log": "PDF ready: {name} | {pages} page(s), {size:.1f} MB",
+        "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
+        "log.video.item_err": "[{cur}/{total}] {name} — error: {error}",
+        "log.video.watermark_start": (
+            "Watermark: {file} | height={height}%, alpha={alpha}%, compression={compression}"
+        ),
+        "log.video.gif_start": "GIF: fps={fps}, width={width}px",
+        "log.video.metadata_start": "Authorship (copy): {count} file(s) {mode}{pack}",
+        "log.video.metadata_inplace": "in place",
+        "log.video.convert_start": (
+            "Convert → {fmt} | compression={compression} | audio={audio}, metadata={metadata}"
+        ),
+        "log.video.ugoira_start": (
+            "Ugoira: {count} clip(s) | pack «{pack}» → ugoira/ | "
+            "chunk={chunk}s, fps={fps}, max={max_frames}{limit}{wm}{author}"
+        ),
+        "log.video.ugoira_limit": ", limit={mb}MB",
+        "log.video.ugoira_wm": ", watermark={file}",
+        "log.video.ugoira_item": "Ugoira [{cur}/{total}]: {name} → {folder}/ ({fps} fps)",
+        "log.video.ugoira_chunk": (
+            "  {folder}/{chunk}: {frames} frames, {size:.1f} MB{quality}{over}"
+        ),
+        "log.video.ugoira_chunk_q": ", JPEG q={q}",
+        "log.video.ugoira_over_limit": " ⚠ over limit",
+        "log.video.ugoira_done": (
+            "Ugoira ready: {clips} clip(s), {chunks} parts, {frames} frames → {path}"
+        ),
         "grid.select_all": "Select all",
         "grid.clear_selection": "Clear selection",
         "grid.loading": "Loading…",
@@ -334,6 +397,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         ),
         "common.dpi": "DPI",
         "common.fps": "FPS",
+        "unit.sec": " сек",
+        "unit.mb": " МБ",
+        "unit.time_sec": "{value:.1f} с",
         "common.not_selected": "(не выбран)",
         "folder.placeholder": "Выберите папку…",
         "folder.dialog": "Выбор папки — {label}",
@@ -591,6 +657,67 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.page": "[{cur}/{total}] страница: {name}",
         "log.compress_error": "[{cur}/{total}] {name} — ошибка: {error}",
         "log.resized": " resized",
+        "log.done": "Готово: {done} из {total}",
+        "log.errors_count": "Ошибок: {failed}",
+        "log.skipped_failed": "Пропущено/ошибок: {failed}",
+        "log.author_suffix": ", автор={author}",
+        "log.pack_suffix": " | пак «{pack}»",
+        "log.batch_header": "{header}{pack} → {folder}/{author}",
+        "log.batch_header_inplace": "{header}{author}",
+        "log.yes": "да",
+        "log.no": "нет",
+        "log.meta_remove": "удалить",
+        "log.meta_keep": "оставить",
+        "log.censor.start": (
+            "Pixiv цензура: {videos} видео, {images} изображений | пак «{pack}» → pixiv/"
+        ),
+        "log.censor.saved": "Цензура сохранена: {name} ({zones} зон)",
+        "log.censor.skip": "[{cur}/{total}] {name} — пропуск: нет зон",
+        "log.censor.item": (
+            "[{cur}/{total}] {name} ({kind}) → pixiv/{out} ({zones} зон)"
+        ),
+        "log.censor.kind_img": "img",
+        "log.censor.kind_vid": "vid",
+        "log.censor.no_zones": "нет зон цензуры — откройте редактор",
+        "log.images.compress_start": (
+            "Сжатие: {input} → {output} | {name_note}, quality={quality}, "
+            "max={max}px, потоков={workers}{selected}{author}"
+        ),
+        "log.images.name_original": "оригинальные имена",
+        "log.images.name_pack": "пак «{pack}»",
+        "log.images.selected": ", выбрано {count} из {total}",
+        "log.images.size_summary": (
+            "Размер: {before:.1f} MB → {after:.1f} MB (−{saved:.1f} MB, {pct:.0f}%)"
+        ),
+        "log.images.pdf_start": "PDF: {input} → {output} | страниц≈{pages}, dpi={dpi}",
+        "log.images.pdf_done_log": "PDF готов: {name} | {pages} стр., {size:.1f} MB",
+        "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
+        "log.video.item_err": "[{cur}/{total}] {name} — ошибка: {error}",
+        "log.video.watermark_start": (
+            "Watermark: {file} | высота={height}%, alpha={alpha}%, сжатие={compression}"
+        ),
+        "log.video.gif_start": "GIF: fps={fps}, ширина={width}px",
+        "log.video.metadata_start": "Авторство (copy): {count} файл(ов) {mode}{pack}",
+        "log.video.metadata_inplace": "на месте",
+        "log.video.convert_start": (
+            "Конвертация → {fmt} | сжатие={compression} | звук={audio}, метаданные={metadata}"
+        ),
+        "log.video.ugoira_start": (
+            "Ugoira: {count} ролик(ов) | пак «{pack}» → ugoira/ | "
+            "chunk={chunk}s, fps={fps}, max={max_frames}{limit}{wm}{author}"
+        ),
+        "log.video.ugoira_limit": ", лимит={mb}МБ",
+        "log.video.ugoira_wm": ", watermark={file}",
+        "log.video.ugoira_item": "Ugoira [{cur}/{total}]: {name} → {folder}/ ({fps} fps)",
+        "log.video.ugoira_chunk": (
+            "  {folder}/{chunk}: {frames} кадров, {size:.1f} МБ{quality}{over}"
+        ),
+        "log.video.ugoira_chunk_q": ", JPEG q={q}",
+        "log.video.ugoira_over_limit": " ⚠ выше лимита",
+        "log.video.ugoira_done": (
+            "Ugoira готов: {clips} ролик(ов), {chunks} ugoira-частей, "
+            "{frames} кадров → {path}"
+        ),
         "grid.select_all": "Выбрать все",
         "grid.clear_selection": "Снять выбор",
         "grid.loading": "загрузка…",
@@ -639,6 +766,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         ),
         "common.dpi": "DPI",
         "common.fps": "FPS",
+        "unit.sec": " 秒",
+        "unit.mb": " MB",
+        "unit.time_sec": "{value:.1f} 秒",
         "common.not_selected": "（未選択）",
         "folder.placeholder": "フォルダを選択…",
         "folder.dialog": "フォルダ選択 — {label}",
@@ -884,6 +1014,66 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.page": "[{cur}/{total}] ページ: {name}",
         "log.compress_error": "[{cur}/{total}] {name} — エラー: {error}",
         "log.resized": " resized",
+        "log.done": "完了: {done} / {total}",
+        "log.errors_count": "エラー: {failed}",
+        "log.skipped_failed": "スキップ/エラー: {failed}",
+        "log.author_suffix": ", 作者={author}",
+        "log.pack_suffix": " | パック «{pack}»",
+        "log.batch_header": "{header}{pack} → {folder}/{author}",
+        "log.batch_header_inplace": "{header}{author}",
+        "log.yes": "あり",
+        "log.no": "なし",
+        "log.meta_remove": "削除",
+        "log.meta_keep": "保持",
+        "log.censor.start": (
+            "Pixivモザイク: 動画 {videos} 本、画像 {images} 枚 | パック «{pack}» → pixiv/"
+        ),
+        "log.censor.saved": "モザイク保存: {name} ({zones} ゾーン)",
+        "log.censor.skip": "[{cur}/{total}] {name} — スキップ: ゾーンなし",
+        "log.censor.item": (
+            "[{cur}/{total}] {name} ({kind}) → pixiv/{out} ({zones} ゾーン)"
+        ),
+        "log.censor.kind_img": "img",
+        "log.censor.kind_vid": "vid",
+        "log.censor.no_zones": "モザイクゾーンなし — エディタを開いてください",
+        "log.images.compress_start": (
+            "圧縮: {input} → {output} | {name_note}, quality={quality}, "
+            "max={max}px, workers={workers}{selected}{author}"
+        ),
+        "log.images.name_original": "元のファイル名",
+        "log.images.name_pack": "パック «{pack}»",
+        "log.images.selected": ", 選択 {count} / {total}",
+        "log.images.size_summary": (
+            "サイズ: {before:.1f} MB → {after:.1f} MB (−{saved:.1f} MB, {pct:.0f}%)"
+        ),
+        "log.images.pdf_start": "PDF: {input} → {output} | ページ≈{pages}, dpi={dpi}",
+        "log.images.pdf_done_log": "PDF完了: {name} | {pages} ページ, {size:.1f} MB",
+        "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
+        "log.video.item_err": "[{cur}/{total}] {name} — エラー: {error}",
+        "log.video.watermark_start": (
+            "Watermark: {file} | 高さ={height}%, alpha={alpha}%, 圧縮={compression}"
+        ),
+        "log.video.gif_start": "GIF: fps={fps}, 幅={width}px",
+        "log.video.metadata_start": "作者情報 (copy): {count} ファイル {mode}{pack}",
+        "log.video.metadata_inplace": "その場",
+        "log.video.convert_start": (
+            "変換 → {fmt} | 圧縮={compression} | 音声={audio}, メタデータ={metadata}"
+        ),
+        "log.video.ugoira_start": (
+            "Ugoira: {count} 本 | パック «{pack}» → ugoira/ | "
+            "chunk={chunk}s, fps={fps}, max={max_frames}{limit}{wm}{author}"
+        ),
+        "log.video.ugoira_limit": ", 上限={mb}MB",
+        "log.video.ugoira_wm": ", watermark={file}",
+        "log.video.ugoira_item": "Ugoira [{cur}/{total}]: {name} → {folder}/ ({fps} fps)",
+        "log.video.ugoira_chunk": (
+            "  {folder}/{chunk}: {frames} フレーム, {size:.1f} MB{quality}{over}"
+        ),
+        "log.video.ugoira_chunk_q": ", JPEG q={q}",
+        "log.video.ugoira_over_limit": " ⚠ 上限超過",
+        "log.video.ugoira_done": (
+            "Ugoira完了: {clips} 本, {chunks} パート, {frames} フレーム → {path}"
+        ),
         "grid.select_all": "すべて選択",
         "grid.clear_selection": "選択解除",
         "grid.loading": "読み込み中…",

@@ -54,7 +54,7 @@ class VideoProbe:
 
     @property
     def summary(self) -> str:
-        audio = self.audio_codec or "нет"
+        audio = self.audio_codec or "none"
         dur = f"{self.duration:.1f}s" if self.duration > 0 else "?"
         return (
             f"{self.video_codec}/{self.container}, {self.width}x{self.height}, "
@@ -96,7 +96,7 @@ def check_ffmpeg() -> tuple[bool, str]:
                 creationflags=_creation_flags(),
             )
         except (subprocess.CalledProcessError, FileNotFoundError) as exc:
-            return False, f"{tool} недоступен: {exc}"
+            return False, f"{tool} not available: {exc}"
     return True, ""
 
 
@@ -223,7 +223,7 @@ def run_ffmpeg(args: list[str], *, quiet: bool = True) -> None:
         tail = stderr[-800:] if len(stderr) > 800 else stderr
         raise FfmpegError(tail or str(exc)) from exc
     except FileNotFoundError as exc:
-        raise FfmpegError("ffmpeg не найден в PATH") from exc
+        raise FfmpegError("ffmpeg not found in PATH") from exc
 
 
 JOB_OUTPUT_SUBDIR = {
@@ -630,7 +630,7 @@ def export_ugoira(
     probe = probe_video(input_path)
     duration = probe.duration
     if duration <= 0:
-        raise FfmpegError(f"не удалось определить длительность: {input_path.name}")
+        raise FfmpegError(f"could not determine duration: {input_path.name}")
 
     fps = resolve_ugoira_fps(
         chunk_sec,
@@ -841,7 +841,7 @@ def _process_one(
             )
             return VideoJobResult(source, out, True, probe=probe)
 
-        return VideoJobResult(source, None, False, f"неизвестная операция: {job}")
+        return VideoJobResult(source, None, False, f"unknown operation: {job}")
     except FfmpegError as exc:
         return VideoJobResult(source, None, False, str(exc), probe=probe)
 

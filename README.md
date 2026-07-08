@@ -4,6 +4,14 @@ Desktop app for **Windows** and **Linux** that prepares images and video for **P
 
 Free to download and use. Built for creators who publish on multiple platforms.
 
+## Languages
+
+The UI is fully translated — switch anytime from the **Language** menu in the toolbar:
+
+- 🇬🇧 **English**
+- 🇷🇺 **Русский**
+- 🇯🇵 **日本語**
+
 ## Features
 
 ### Images
@@ -41,6 +49,22 @@ Settings (folders, watermarks, image/video quality, compression level, author EX
 | Linux | `~/.config/ContentSuite/config.json` (or `$XDG_CONFIG_HOME/ContentSuite/`) |
 
 Logs and thumbnail caches live in the same folder.
+
+## Screenshots
+
+Optional visual walkthrough — SFW demo art only.
+
+**Pixiv Censor** — media grid with hover preview. Mixed video and images in one folder; hover a tile to open a large preview beside the panel.
+
+![Pixiv Censor tab — grid and hover preview](img/Pixiv_censor_menu.png)
+
+**Pixiv Censor** — lasso editor. Hold LMB to outline a zone; the contour auto-closes. Side-by-side original vs mosaic preview before export.
+
+![Pixiv Censor — lasso zones and mosaic preview](img/Pixiv_censor_demonstration.png)
+
+**Video** — settings and clip grid. Watermark, GIF, convert, compression presets, and ugoira options on the left; clip thumbnails with hover preview on the right.
+
+![Video tab — settings and clip grid](img/Video_menu.jpg)
 
 ## Requirements
 

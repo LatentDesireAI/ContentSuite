@@ -255,7 +255,7 @@ def process_pack(
         return summary
 
     if not keep_original_name and not base_name.strip():
-        raise ValueError("Укажите имя пака (base name).")
+        raise ValueError("Specify pack name (base name).")
 
     worker_count = max(1, workers or default_worker_count())
     output_names = plan_output_names(
