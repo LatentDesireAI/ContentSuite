@@ -79,7 +79,13 @@ Optional visual walkthrough — SFW demo art only.
 
 ## Quick start
 
-### Windows
+### Windows — download (no Python)
+
+Pre-built zip on **[GitHub Releases](https://github.com/LatentDesireAI/ContentSuite/releases)** — unzip and run `ContentSuite.exe`.
+
+You still need [ffmpeg](https://ffmpeg.org/) in `PATH`. Settings go to `%APPDATA%\ContentSuite\`.
+
+### Windows — from source
 
 ```bat
 run.bat
