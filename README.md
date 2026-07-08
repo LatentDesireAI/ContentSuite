@@ -66,6 +66,12 @@ core/                — compression, censor, ffmpeg, watermark, config, PDF
 ui/                  — grids, censor editor, dialogs, pickers
 ```
 
+## Support & feedback
+
+ContentSuite is free. If you stumbled on it, find it useful, and want to say thanks or support ongoing work, you can buy me a coffee on [Ko-fi](https://ko-fi.com/latentdesire).
+
+I’m always open to ideas for improvements — feature requests, workflow tweaks, and bug reports are welcome (GitHub issues or any channel you already use to reach me).
+
 ## Authors
 
 **[LatentDesireAI](https://github.com/LatentDesireAI)** — creator & maintainer
