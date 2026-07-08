@@ -1,9 +1,11 @@
-"""Persistent user settings stored in %APPDATA%/ContentSuite/config.json."""
+"""Persistent user settings — Windows: %APPDATA%/ContentSuite; Linux: ~/.config/ContentSuite."""
 
 from __future__ import annotations
 
 import json
 import os
+import shutil
+import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -74,11 +76,30 @@ DEFAULT_CONFIG: dict[str, Any] = {
 }
 
 
+def app_data_dir() -> Path:
+    """Per-user app folder: config, logs, thumbnail caches."""
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or str(Path.home())
+        return Path(base) / APP_NAME
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    if xdg:
+        return Path(xdg) / APP_NAME
+    return Path.home() / ".config" / APP_NAME
+
+
 def config_path() -> Path:
-    appdata = os.environ.get("APPDATA")
-    if not appdata:
-        appdata = str(Path.home())
-    return Path(appdata) / APP_NAME / "config.json"
+    return app_data_dir() / "config.json"
+
+
+def _migrate_legacy_config(target: Path) -> None:
+    """Import config from older Linux fallback path ~/ContentSuite/."""
+    if target.is_file():
+        return
+    legacy = Path.home() / APP_NAME / "config.json"
+    if not legacy.is_file():
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(legacy, target)
 
 
 class ConfigStore:
@@ -88,6 +109,7 @@ class ConfigStore:
         self.load()
 
     def load(self) -> None:
+        _migrate_legacy_config(self._path)
         if not self._path.exists():
             return
         try:

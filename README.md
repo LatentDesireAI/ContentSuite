@@ -1,6 +1,6 @@
 # ContentSuite
 
-Public desktop app for Windows that prepares images and video for **Patreon**, **Pixiv**, and **X**.
+Desktop app for **Windows** and **Linux** that prepares images and video for **Patreon**, **Pixiv**, and **X**.
 
 Free to download and use. Built for creators who publish on multiple platforms.
 
@@ -33,15 +33,27 @@ Free to download and use. Built for creators who publish on multiple platforms.
 - Export to `pixiv/` as `name_1.mp4`, `name_2.jpg`, … (shared pack prefix)
 - Adjustable mosaic pixel size (typical 12–24 for Pixiv)
 
-Settings (folders, watermarks, image/video quality, compression level, author EXIF) are stored in `%APPDATA%\ContentSuite\config.json`.
+Settings (folders, watermarks, image/video quality, compression level, author EXIF) are stored in:
+
+| OS | Config path |
+|----|-------------|
+| Windows | `%APPDATA%\ContentSuite\config.json` |
+| Linux | `~/.config/ContentSuite/config.json` (or `$XDG_CONFIG_HOME/ContentSuite/`) |
+
+Logs and thumbnail caches live in the same folder.
 
 ## Requirements
 
-- Windows 10/11
 - [Python](https://www.python.org/downloads/) 3.11+
 - [ffmpeg](https://ffmpeg.org/) and `ffprobe` in `PATH`
 
+**Windows:** 10/11 — primary platform, fully tested.
+
+**Linux:** recent distro with Python 3.11+ and ffmpeg packages. Image processing, conversion, censor, and export work the same as on Windows. **Video hover preview** in the clip grid uses Qt Multimedia and may need extra packages (see below); ffmpeg-based export is unaffected.
+
 ## Quick start
+
+### Windows
 
 ```bat
 run.bat
@@ -56,6 +68,34 @@ python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 .venv\Scripts\pythonw main.py
 ```
+
+### Linux
+
+```bash
+chmod +x run.sh   # once, after clone
+./run.sh
+```
+
+Manual setup:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+**Optional — video hover preview** (if clips show a black tile or no audio on hover):
+
+```bash
+# Debian / Ubuntu
+sudo apt install ffmpeg python3-venv gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-libav
+
+# Fedora
+sudo dnf install ffmpeg python3 gstreamer1-plugins-base gstreamer1-plugins-good
+```
+
+If preview still fails, use the grid for selection — all export jobs run through ffmpeg regardless.
 
 ## Project layout
 

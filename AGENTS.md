@@ -1,9 +1,9 @@
 # ContentSuite — AGENTS.md
 
 ## Project overview
-Windows desktop app for preparing content for **Patreon**, **Pixiv**, **X**, and **Bluesky**.
+Desktop app for **Windows** (primary) and **Linux** — content prep for **Patreon**, **Pixiv**, **X**, and **Bluesky**.
 
-Stack: Python 3.11+, PySide6 (GUI), ffmpeg (video), Pillow (images + PDF), JSON config in `%APPDATA%`.
+Stack: Python 3.11+, PySide6 (GUI), ffmpeg (video), Pillow (images + PDF). Config: `%APPDATA%/ContentSuite` (Windows) or `~/.config/ContentSuite` (Linux/XDG). Launch: `run.bat` / `run.sh`.
 
 UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `core/i18n_catalog.py`.
 
