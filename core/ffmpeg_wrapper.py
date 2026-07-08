@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Callable
 
 from core.app_log import get_logger
+from core.media_scan import collect_media_files
 from core.metadata import (
     build_ffmpeg_metadata_flags,
     embed_author_in_folder,
@@ -108,13 +109,7 @@ def _creation_flags() -> int:
 
 
 def collect_videos(folder: Path) -> list[Path]:
-    if not folder.is_dir():
-        return []
-    files = [
-        p for p in folder.iterdir()
-        if p.is_file() and p.suffix.lower() in VIDEO_EXTENSIONS
-    ]
-    return sorted(files, key=lambda p: p.name.lower())
+    return collect_media_files(folder, VIDEO_EXTENSIONS)
 
 
 def probe_video(path: Path) -> VideoProbe:

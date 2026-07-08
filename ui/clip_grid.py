@@ -252,7 +252,7 @@ class ClipTile(QFrame):
         self.check_badge.adjustSize()
 
         self.name_label = QLabel(_elide(path.name, tile_width - 8))
-        self.name_label.setToolTip(path.name)
+        self.name_label.setToolTip(str(path))
         self.name_label.setStyleSheet("color: #222; font-size: 11px;")
 
         self.meta_label = QLabel()

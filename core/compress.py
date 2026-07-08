@@ -13,6 +13,7 @@ from typing import Callable
 
 from PIL import Image
 
+from core.media_scan import collect_media_files
 from core.metadata import AuthorMetadata, build_exif
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tiff"}
@@ -147,13 +148,7 @@ def plan_output_names(
 
 
 def collect_images(folder: Path) -> list[Path]:
-    if not folder.is_dir():
-        return []
-    files = [
-        p for p in folder.iterdir()
-        if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS
-    ]
-    return sorted(files)
+    return collect_media_files(folder, IMAGE_EXTENSIONS)
 
 
 def _resize_if_needed(img: Image.Image, max_res: int) -> tuple[Image.Image, bool]:
