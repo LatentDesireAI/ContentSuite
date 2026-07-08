@@ -1,6 +1,23 @@
 # Release checklist
 
-## Build (Windows)
+## Automated build (GitHub Actions)
+
+On every tag `v*` (e.g. `v1.0.1`), workflow **Release build** (`.github/workflows/release.yml`):
+
+1. Runs on `windows-latest`
+2. PyInstaller → `ContentSuite-win64.zip`
+3. Creates/updates the GitHub Release and uploads the zip
+
+```bat
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+Manual run: **Actions → Release build → Run workflow**.
+
+Match `core/credits.py` → `APP_VERSION` when bumping versions.
+
+## Build (Windows, local)
 
 Requirements on the build machine: Python 3.11+, same as development.
 
@@ -15,24 +32,16 @@ Output:
 
 **ffmpeg is not bundled.** Users still need [ffmpeg](https://ffmpeg.org/) and `ffprobe` in `PATH` (same as the source install).
 
-## Publish on GitHub
+## Publish on GitHub (manual fallback)
 
-1. Tag: `v1.0.0` (match `core/credits.py` → `APP_VERSION`)
-2. Title: `ContentSuite v1.0.0 (Windows)`
-3. Attach: `dist/ContentSuite-win64.zip`
-4. Notes (short):
-
-   - Windows 10/11 portable build — unzip and run `ContentSuite.exe`
-   - Requires ffmpeg/ffprobe in PATH
-   - Config: `%APPDATA%\ContentSuite\`
-   - MIT license
+If CI is unavailable, build locally (`build_release.bat`) and upload `dist/ContentSuite-win64.zip` to the release page.
 
 With GitHub CLI:
 
 ```bat
-gh release create v1.0.0 dist\ContentSuite-win64.zip ^
-  --title "ContentSuite v1.0.0 (Windows)" ^
+gh release create v1.0.1 dist\ContentSuite-win64.zip ^
+  --title "ContentSuite v1.0.1 (Windows)" ^
   --notes "Windows portable build. Requires ffmpeg in PATH. See README."
 ```
 
-Linux binary: build on a Linux machine with the same spec (PyInstaller); not produced from Windows CI in this repo yet.
+Linux binary: add an `ubuntu-latest` job to the workflow later (same PyInstaller spec).

@@ -1,0 +1,71 @@
+# Build Windows portable zip and attach to GitHub Release on version tags.
+#
+# Usage:
+#   git tag v1.0.1
+#   git push origin v1.0.1
+#
+# Or: Actions → Release build → Run workflow (workflow_dispatch).
+
+name: Release build
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. v1.0.1 — must already exist on the repo)
+        required: true
+        default: v1.0.1
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            build-requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r build-requirements.txt
+
+      - name: Build executable (PyInstaller)
+        run: python -m PyInstaller --noconfirm ContentSuite.spec
+
+      - name: Create zip archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\ContentSuite\* -DestinationPath dist\ContentSuite-win64.zip
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          files: dist/ContentSuite-win64.zip
+          generate_release_notes: true
+          body: |
+            ## Windows portable build
+
+            1. Download **ContentSuite-win64.zip**
+            2. Unzip anywhere
+            3. Run **ContentSuite.exe**
+
+            ### Requirements
+            - Windows 10/11
+            - [ffmpeg](https://ffmpeg.org/) and `ffprobe` in `PATH`
+
+            ### Config
+            `%APPDATA%\ContentSuite\config.json`
