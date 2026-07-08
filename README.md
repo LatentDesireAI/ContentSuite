@@ -20,6 +20,7 @@ Free to download and use. Built for creators who publish on multiple platforms.
 ### Video
 - Watermark overlay (position, opacity, size)
 - Convert to mp4 / webm / mov
+- **Compression presets** — dropdown from maximum to near-lossless (CRF x264 / VP9); saves space while keeping visual quality
 - GIF export
 - Ugoira export (frames + `animation.json`)
 - Clip grid with hover preview and audio
@@ -28,7 +29,7 @@ Free to download and use. Built for creators who publish on multiple platforms.
 ### Pixiv Censor
 - Blur/block censoring on video with manual zone editor
 
-Settings (folders, watermarks, quality, author EXIF) are stored in `%APPDATA%\ContentSuite\config.json`.
+Settings (folders, watermarks, image/video quality, compression level, author EXIF) are stored in `%APPDATA%\ContentSuite\config.json`.
 
 ## Requirements
 

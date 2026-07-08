@@ -41,6 +41,7 @@ from core.ffmpeg_wrapper import (
     process_video_batch,
     resolve_ugoira_fps,
 )
+from core.video_compression import COMPRESSION_PRESETS, DEFAULT_COMPRESSION_ID
 from core.watermark import WatermarkSettings
 from tabs.base_tab import BaseTab
 from ui.clip_grid import ClipGrid
@@ -311,6 +312,23 @@ class VideoTab(BaseTab):
         self.format_combo.setCurrentIndex(idx if idx >= 0 else 0)
         self.format_combo.currentIndexChanged.connect(self._on_format_changed)
 
+        self.compression_combo = QComboBox()
+        self.compression_combo.setMinimumWidth(200)
+        for preset in COMPRESSION_PRESETS:
+            self.compression_combo.addItem(preset.id, preset.id)
+        saved_level = config.get("video_compression_level", DEFAULT_COMPRESSION_ID)
+        level_idx = self.compression_combo.findData(saved_level)
+        self.compression_combo.setCurrentIndex(
+            level_idx if level_idx >= 0 else 2
+        )
+        self.compression_combo.currentIndexChanged.connect(
+            self._on_compression_changed
+        )
+
+        self.compression_hint = QLabel()
+        self.compression_hint.setWordWrap(True)
+        self.compression_hint.setStyleSheet("color: #666; font-size: 10px;")
+
         self.keep_audio_cb = QCheckBox()
         self.keep_audio_cb.setChecked(bool(config.get("video_keep_audio", True)))
         self.keep_audio_cb.toggled.connect(
@@ -355,7 +373,10 @@ class VideoTab(BaseTab):
         self.metadata_btn.clicked.connect(self._start_metadata)
 
         self._lbl_format = QLabel()
+        self._lbl_compression = QLabel()
         conv_form.addRow(self._lbl_format, self.format_combo)
+        conv_form.addRow(self._lbl_compression, self.compression_combo)
+        conv_form.addRow("", self.compression_hint)
         conv_form.addRow("", self.keep_audio_cb)
         conv_form.addRow("", self.remove_meta_cb)
         conv_form.addRow("", self.reencode_cb)
@@ -559,6 +580,13 @@ class VideoTab(BaseTab):
 
         self._conv_group.setTitle(tr("video.conv_group"))
         self._lbl_format.setText(tr("video.format"))
+        self._lbl_compression.setText(tr("video.compress_level"))
+        self.compression_combo.setToolTip(tr("video.compress_tip"))
+        for index, preset in enumerate(COMPRESSION_PRESETS):
+            self.compression_combo.setItemText(
+                index, tr(f"video.compress.{preset.id}")
+            )
+        self._update_compression_hint()
         self.keep_audio_cb.setText(tr("video.keep_audio"))
         self.remove_meta_cb.setText(tr("video.remove_meta"))
         self.reencode_cb.setText(tr("video.reencode"))
@@ -669,6 +697,19 @@ class VideoTab(BaseTab):
 
     def _on_format_changed(self) -> None:
         self.config.set("video_output_format", self.format_combo.currentData())
+
+    def _on_compression_changed(self) -> None:
+        level = self.compression_combo.currentData()
+        if level:
+            self.config.set("video_compression_level", level)
+        self._update_compression_hint()
+
+    def _update_compression_hint(self) -> None:
+        level = self.compression_combo.currentData() or DEFAULT_COMPRESSION_ID
+        self.compression_hint.setText(tr(f"video.compress.{level}_hint"))
+
+    def _selected_compression_level(self) -> str:
+        return self.compression_combo.currentData() or DEFAULT_COMPRESSION_ID
 
     def _reload_watermark_combo(self) -> None:
         self.watermark_combo.clear()
@@ -850,14 +891,17 @@ class VideoTab(BaseTab):
                 self, tr("common.content_suite"), tr("video.warn_wm_png")
             )
             return
+        level = self._selected_compression_level()
         self._start_batch(
             "watermark",
             {
                 "watermark_path": wm_path,
                 "watermark_settings": self._watermark_settings(),
+                "compression_level": level,
             },
             f"Watermark: {wm_path.name} | высота={self.wm_height_spin.value()}%, "
-            f"alpha={self.wm_alpha_spin.value()}%",
+            f"alpha={self.wm_alpha_spin.value()}%, "
+            f"сжатие={tr(f'video.compress.{level}')}",
         )
 
     def _start_gif(self) -> None:
@@ -904,6 +948,7 @@ class VideoTab(BaseTab):
 
     def _start_convert(self) -> None:
         fmt = self.format_combo.currentData()
+        level = self._selected_compression_level()
         self._start_batch(
             "convert",
             {
@@ -911,8 +956,10 @@ class VideoTab(BaseTab):
                 "remove_metadata": self.remove_meta_cb.isChecked(),
                 "keep_audio": self.keep_audio_cb.isChecked(),
                 "reencode": self.reencode_cb.isChecked(),
+                "compression_level": level,
             },
-            f"Конвертация → {fmt} | звук={'да' if self.keep_audio_cb.isChecked() else 'нет'}, "
+            f"Конвертация → {fmt} | сжатие={tr(f'video.compress.{level}')} | "
+            f"звук={'да' if self.keep_audio_cb.isChecked() else 'нет'}, "
             f"метаданные={'удалить' if self.remove_meta_cb.isChecked() else 'оставить'}",
         )
 

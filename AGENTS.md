@@ -11,13 +11,14 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `main.py` — QApplication entry point, main window with QTabWidget
 - `tabs/images_tab.py` — images: compress, metadata strip, PDF
 - `tabs/pixiv_preview_tab.py` — Pixiv collage cover (up to 3 artworks)
-- `tabs/video_tab.py` — video: watermark, convert, GIF, ugoira
+- `tabs/video_tab.py` — video: watermark, convert, GIF, ugoira, compression level UI
 - `tabs/pixiv_censor_tab.py` — Pixiv video censor export
 - `core/pixiv_preview.py` — collage layouts on white background
 - `core/compress.py` — image compression, metadata stripping, optional original filenames
 - `core/pdf_export.py` — multi-page PDF via Pillow
 - `core/watermark.py` — shared watermark logic (position, opacity) for images + video
 - `core/ffmpeg_wrapper.py` — codec probe, convert, GIF, ugoira export
+- `core/video_compression.py` — CRF presets (x264 / VP9) for re-encode jobs
 - `core/config_store.py` — persistent settings (folders, watermarks, quality)
 - `core/i18n.py` — UI translation manager
 - `ui/image_grid.py` — image tile grid with hover preview
@@ -43,6 +44,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - [x] Stage 5: video_tab — codec probe (ffprobe), video watermark
 - [x] Stage 6: GIF export (fps / width)
 - [x] Stage 7: mp4/webm/mov convert, metadata removal, audio on/off
+- [x] Video compression: dropdown presets (maximum → minimal / near-lossless), `video_compression_level` in config
 - [x] Stage 8: ugoira export (frames + animation.json), optional watermark
 - [x] Stage 9: clip grid with hover preview + audio
 - [x] Stage 10 (partial): persistent config for watermarks and video settings
@@ -56,7 +58,15 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - Opacity: alpha 0–100, applied via ffmpeg `overlay` + `colorchannelmixer` or Pillow alpha paste.
 - Watermark file list is stored as paths in config; UI uses dropdown + “Add…”.
 
+## Video compression
+- Presets in `core/video_compression.py`: `maximum`, `high`, `medium`, `near_lossless`, `minimal`.
+- UI dropdown on Video tab → Convert block; persisted as `video_compression_level` (default `medium`).
+- Applied when ffmpeg re-encodes: WebM output always; MP4/MOV only with “Re-encode video” checked.
+- Also used by watermark export (VP9 webm) and Pixiv censor export (reads same config key).
+- “Near lossless” / “Minimal” — low CRF (18–14 x264, 22–16 VP9) for space savings with no visible loss.
+
 ## ffmpeg wrapper requirements
 - Before convert: `ffprobe` for input codec/container; wrap all subprocess calls in try/except;
   never crash the GUI — log errors to the log panel.
 - Ugoira: export frames + `.json` (frame delays), compatible with Pixiv upload format.
+- Re-encode paths call `ffmpeg_video_encode_args(format, compression_level)` from `core/video_compression.py`.

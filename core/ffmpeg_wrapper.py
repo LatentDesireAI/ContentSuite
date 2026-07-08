@@ -291,6 +291,7 @@ def apply_watermark(
     *,
     copy_audio: bool = True,
     remove_metadata: bool = True,
+    compression_level: str = DEFAULT_COMPRESSION_ID,
     author_meta: dict | None = None,
     title: str = "",
 ) -> None:
@@ -301,7 +302,7 @@ def apply_watermark(
         "-i", str(input_path),
         "-i", str(watermark_path),
         "-filter_complex", filt,
-        *ffmpeg_video_encode_args(output_format, DEFAULT_COMPRESSION_ID),
+        *ffmpeg_video_encode_args(output_format, compression_level),
     ]
     if copy_audio and probe.has_audio:
         args.extend(ffmpeg_audio_encode_args(output_format))
@@ -765,6 +766,9 @@ def _process_one(
                 settings,
                 copy_audio=True,
                 remove_metadata=kwargs.get("remove_metadata", True),
+                compression_level=kwargs.get(
+                    "compression_level", DEFAULT_COMPRESSION_ID
+                ),
                 author_meta=kwargs.get("author_meta"),
                 title=output_stem or source.stem,
             )
