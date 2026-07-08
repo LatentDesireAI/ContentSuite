@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QSizePolicy, QTabWidget
 
 from core.app_log import get_logger, install_qt_message_handler, log_file_path, setup_app_logging
 from core.config_store import ConfigStore
+from core.branding import apply_windows_app_identity, load_app_icon
 from core.credits import AI_ASSISTED_LABEL
 from core.i18n import I18n, init_language, tr
 from core.thumb_cache import prune_all_thumbnail_caches
@@ -123,10 +124,16 @@ def main() -> int:
             prune_summary.freed_bytes / 1024 / 1024,
         )
     try:
+        apply_windows_app_identity()
         log.info("Creating QApplication")
         app = QApplication(sys.argv)
         app.setApplicationName("ContentSuite")
+        app_icon = load_app_icon()
+        if app_icon is not None:
+            app.setWindowIcon(app_icon)
         window = MainWindow()
+        if app_icon is not None:
+            window.setWindowIcon(app_icon)
         window.show()
         log.info("Event loop started (log: %s)", log_file_path())
         code = app.exec()

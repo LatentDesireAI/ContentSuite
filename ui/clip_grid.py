@@ -148,7 +148,6 @@ class HoverPreviewPopup(QFrame):
     def show_for_tile(self, path: Path, probe: VideoProbe | None, anchor: QWidget) -> None:
         self._current_path = path
 
-        screen = anchor.screen().availableGeometry()
         tile_rect = QRect(
             anchor.mapToGlobal(anchor.rect().topLeft()),
             anchor.size(),
@@ -159,7 +158,6 @@ class HoverPreviewPopup(QFrame):
         )
         video_w, video_h, x, y = compute_hover_preview_layout(
             tile_rect,
-            screen,
             aspect,
             frame_pad=PREVIEW_FRAME_PAD,
         )

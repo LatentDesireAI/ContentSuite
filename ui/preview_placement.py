@@ -3,12 +3,30 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QRect
+from PySide6.QtGui import QGuiApplication
 
 
 def media_aspect(width: int, height: int, *, default: float = 16 / 9) -> float:
     if width > 0 and height > 0:
         return width / height
     return default
+
+
+def screen_available_for(global_rect: QRect) -> QRect:
+    """Available geometry of the monitor that contains *global_rect*."""
+    app = QGuiApplication.instance()
+    if app is None:
+        return global_rect
+    screen = app.screenAt(global_rect.center())
+    if screen is None:
+        screen = app.primaryScreen()
+    if screen is None:
+        return global_rect
+    return screen.availableGeometry()
+
+
+def _inner_screen(screen: QRect, margin: int) -> QRect:
+    return screen.adjusted(margin, margin, -margin, -margin)
 
 
 def _fit_aspect(
@@ -36,11 +54,69 @@ def _rects_intersect(a: QRect, b: QRect) -> bool:
     return a.intersects(b)
 
 
+def _fit_popup_in_screen(
+    content_w: int,
+    content_h: int,
+    x: int,
+    y: int,
+    *,
+    frame_pad: int,
+    screen: QRect,
+    margin: int,
+    aspect: float,
+    min_content_w: int,
+    min_content_h: int,
+) -> tuple[int, int, int, int]:
+    """Shrink and slide popup so it stays fully inside *screen*."""
+    inner = _inner_screen(screen, margin)
+    if inner.width() <= 0 or inner.height() <= 0:
+        return content_w, content_h, x, y
+
+    max_inner_w = max(1, inner.width() - frame_pad * 2)
+    max_inner_h = max(1, inner.height() - frame_pad * 2)
+    popup_w = content_w + frame_pad * 2
+    popup_h = content_h + frame_pad * 2
+
+    if popup_w > inner.width() or popup_h > inner.height():
+        shrunk_w, shrunk_h = _fit_aspect(
+            max_inner_w,
+            max_inner_h,
+            aspect,
+            min_w=min(min_content_w, max_inner_w),
+            min_h=min(min_content_h, max_inner_h),
+        )
+        if shrunk_w > 0 and shrunk_h > 0:
+            content_w, content_h = shrunk_w, shrunk_h
+            popup_w = content_w + frame_pad * 2
+            popup_h = content_h + frame_pad * 2
+
+    if popup_w > inner.width():
+        popup_w = inner.width()
+        content_w = max(1, popup_w - frame_pad * 2)
+        content_h = max(1, round(content_w / aspect))
+        popup_h = content_h + frame_pad * 2
+        if popup_h > inner.height():
+            popup_h = inner.height()
+            content_h = max(1, popup_h - frame_pad * 2)
+            content_w = max(1, round(content_h * aspect))
+
+    if popup_h > inner.height():
+        popup_h = inner.height()
+        content_h = max(1, popup_h - frame_pad * 2)
+        content_w = max(1, round(content_h * aspect))
+        popup_w = content_w + frame_pad * 2
+
+    x = max(inner.left(), min(x, inner.right() - popup_w + 1))
+    y = max(inner.top(), min(y, inner.bottom() - popup_h + 1))
+
+    return content_w, content_h, x, y
+
+
 def compute_hover_preview_layout(
     tile_global: QRect,
-    screen_available: QRect,
     aspect: float,
     *,
+    screen_available: QRect | None = None,
     gap: int = 8,
     margin: int = 8,
     frame_pad: int = 4,
@@ -50,19 +126,24 @@ def compute_hover_preview_layout(
     """
     Return content width/height and global (x, y) for a hover popup.
 
-    Picks the side (left, right, above, below) with the most room, sizes the
-    preview up to the screen edge without overlapping the anchor tile.
+    Picks the side (left, right, above, below) with the most room on the
+    monitor that contains the tile, sizes the preview up to that edge, and
+    clamps the result so nothing spills onto another monitor.
     """
     if aspect <= 0:
         aspect = 16 / 9
 
-    vert_span = screen_available.height() - 2 * margin
-    horiz_span = screen_available.width() - 2 * margin
+    screen = screen_available if screen_available is not None else screen_available_for(
+        tile_global
+    )
+    inner = _inner_screen(screen, margin)
+    vert_span = inner.height()
+    horiz_span = inner.width()
 
     placements: list[tuple[int, int, int, QRect]] = []
 
     # Right of tile — use horizontal space to screen edge.
-    max_w = screen_available.right() - tile_global.right() - gap - margin
+    max_w = screen.right() - tile_global.right() - gap - margin
     content_w, content_h = _fit_aspect(
         max_w, vert_span, aspect, min_w=min_content_w, min_h=min_content_h
     )
@@ -72,7 +153,7 @@ def compute_hover_preview_layout(
         placements.append((content_w, content_h, popup.width() * popup.height(), popup))
 
     # Left of tile
-    max_w = tile_global.left() - screen_available.left() - gap - margin
+    max_w = tile_global.left() - screen.left() - gap - margin
     content_w, content_h = _fit_aspect(
         max_w, vert_span, aspect, min_w=min_content_w, min_h=min_content_h
     )
@@ -84,37 +165,40 @@ def compute_hover_preview_layout(
         placements.append((content_w, content_h, popup.width() * popup.height(), popup))
 
     # Below tile — use vertical space to screen edge.
-    max_h = screen_available.bottom() - tile_global.bottom() - gap - margin
+    max_h = screen.bottom() - tile_global.bottom() - gap - margin
     content_w, content_h = _fit_aspect(
-        horiz_span, max_h, aspect, min_w=min_content_w, min_h=min_content_h
+        horiz_span - frame_pad * 2, max_h, aspect, min_w=min_content_w, min_h=min_content_h
     )
     if content_w > 0:
         popup = QRect(0, 0, content_w + frame_pad * 2, content_h + frame_pad * 2)
-        popup.moveTo(screen_available.left() + margin, tile_global.bottom() + gap)
+        popup.moveTo(inner.left(), tile_global.bottom() + gap)
         placements.append((content_w, content_h, popup.width() * popup.height(), popup))
 
     # Above tile
-    max_h = tile_global.top() - screen_available.top() - gap - margin
+    max_h = tile_global.top() - screen.top() - gap - margin
     content_w, content_h = _fit_aspect(
-        horiz_span, max_h, aspect, min_w=min_content_w, min_h=min_content_h
+        horiz_span - frame_pad * 2, max_h, aspect, min_w=min_content_w, min_h=min_content_h
     )
     if content_w > 0:
         popup_w = content_w + frame_pad * 2
         popup_h = content_h + frame_pad * 2
         popup = QRect(0, 0, popup_w, popup_h)
-        popup.moveTo(screen_available.left() + margin, tile_global.top() - gap - popup_h)
+        popup.moveTo(inner.left(), tile_global.top() - gap - popup_h)
         placements.append((content_w, content_h, popup.width() * popup.height(), popup))
 
     if not placements:
-        content_w = min_content_w
-        content_h = max(min_content_h, round(content_w / aspect))
-        popup_w = content_w + frame_pad * 2
-        popup_h = content_h + frame_pad * 2
-        x = min(
+        content_w, content_h, x, y = _fit_popup_in_screen(
+            min_content_w,
+            max(min_content_h, round(min_content_w / aspect)),
             tile_global.right() + gap,
-            screen_available.right() - popup_w - margin,
+            tile_global.top(),
+            frame_pad=frame_pad,
+            screen=screen,
+            margin=margin,
+            aspect=aspect,
+            min_content_w=min_content_w,
+            min_content_h=min_content_h,
         )
-        y = max(screen_available.top() + margin, tile_global.top())
         return content_w, content_h, x, y
 
     valid = [
@@ -129,27 +213,45 @@ def compute_hover_preview_layout(
 
     x = popup_rect.x()
     y = popup_rect.y()
-    popup_w = popup_rect.width()
-    popup_h = popup_rect.height()
 
-    if x < screen_available.left() + margin:
-        x = screen_available.left() + margin
-    if x + popup_w > screen_available.right() - margin:
-        x = screen_available.right() - margin - popup_w
-    if y < screen_available.top() + margin:
-        y = screen_available.top() + margin
-    if y + popup_h > screen_available.bottom() - margin:
-        y = screen_available.bottom() - margin - popup_h
+    content_w, content_h, x, y = _fit_popup_in_screen(
+        content_w,
+        content_h,
+        x,
+        y,
+        frame_pad=frame_pad,
+        screen=screen,
+        margin=margin,
+        aspect=aspect,
+        min_content_w=min_content_w,
+        min_content_h=min_content_h,
+    )
 
+    popup_w = content_w + frame_pad * 2
+    popup_h = content_h + frame_pad * 2
     final = QRect(x, y, popup_w, popup_h)
     if _rects_intersect(final, tile_global):
-        if screen_available.right() - tile_global.right() >= tile_global.left() - screen_available.left():
+        room_right = screen.right() - tile_global.right() - gap - margin
+        room_left = tile_global.left() - screen.left() - gap - margin
+        if room_right >= room_left:
             x = tile_global.right() + gap
         else:
             x = tile_global.left() - gap - popup_w
         y = max(
-            screen_available.top() + margin,
-            min(tile_global.top(), screen_available.bottom() - margin - popup_h),
+            inner.top(),
+            min(tile_global.top(), inner.bottom() - popup_h + 1),
+        )
+        content_w, content_h, x, y = _fit_popup_in_screen(
+            content_w,
+            content_h,
+            x,
+            y,
+            frame_pad=frame_pad,
+            screen=screen,
+            margin=margin,
+            aspect=aspect,
+            min_content_w=min_content_w,
+            min_content_h=min_content_h,
         )
 
     return content_w, content_h, x, y

@@ -24,9 +24,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.ok": "OK",
         "menu.about": "About ContentSuite…",
         "about.title": "About ContentSuite",
+        "about.version": "v{version}",
         "about.body": (
-            "<h2 style='margin-top:0'>{app}</h2>"
-            "<p style='color:#666'>v{version}</p>"
             "<p>Created by <a href='{author_url}'>{author}</a><br>"
             "<a href='{repo_url}'>GitHub repository</a></p>"
             "<p><b>{ai_label}</b><br>"
@@ -387,9 +386,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.ok": "ОК",
         "menu.about": "О программе…",
         "about.title": "О программе ContentSuite",
+        "about.version": "v{version}",
         "about.body": (
-            "<h2 style='margin-top:0'>{app}</h2>"
-            "<p style='color:#666'>v{version}</p>"
             "<p>Создано: <a href='{author_url}'>{author}</a><br>"
             "<a href='{repo_url}'>Репозиторий на GitHub</a></p>"
             "<p><b>{ai_label}</b><br>"
@@ -756,9 +754,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.ok": "OK",
         "menu.about": "ContentSuiteについて…",
         "about.title": "ContentSuiteについて",
+        "about.version": "v{version}",
         "about.body": (
-            "<h2 style='margin-top:0'>{app}</h2>"
-            "<p style='color:#666'>v{version}</p>"
             "<p>作成: <a href='{author_url}'>{author}</a><br>"
             "<a href='{repo_url}'>GitHubリポジトリ</a></p>"
             "<p><b>{ai_label}</b><br>"

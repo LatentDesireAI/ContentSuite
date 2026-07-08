@@ -38,6 +38,12 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 5. Before implementing a feature, check the implementation status section below.
 6. User-facing strings go through `tr("key")` in `core/i18n_catalog.py` (EN/RU/JA).
 
+## Versioning (do not forget)
+- **Single source of truth:** `core/credits.py` → `APP_VERSION` (semver, e.g. `1.1.0`).
+- Shown in **About** dialog (`ui/about_dialog.py`) via `tr("about.version", version=APP_VERSION)`.
+- When bumping a release: update `APP_VERSION`, git tag `v{APP_VERSION}`, and `RELEASE.md` / GitHub Actions tag push.
+- Do not hardcode version strings elsewhere.
+
 ## Implementation status (update after each milestone)
 - [x] Stage 1: basic shell, QTabWidget, input/output folder pickers
 - [x] Stage 2: image compression + metadata removal (images_tab)

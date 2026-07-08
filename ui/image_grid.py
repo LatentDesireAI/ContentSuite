@@ -142,7 +142,6 @@ class ImageHoverPreviewPopup(QFrame):
     def show_for_tile(self, path: Path, probe: ImageProbe | None, anchor: QWidget) -> None:
         self._current_path = path
 
-        screen = anchor.screen().availableGeometry()
         tile_rect = QRect(
             anchor.mapToGlobal(anchor.rect().topLeft()),
             anchor.size(),
@@ -154,7 +153,6 @@ class ImageHoverPreviewPopup(QFrame):
         )
         img_w, img_h, x, y = compute_hover_preview_layout(
             tile_rect,
-            screen,
             aspect,
             frame_pad=PREVIEW_FRAME_PAD,
         )

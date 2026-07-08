@@ -17,7 +17,7 @@ on:
       tag:
         description: Release tag (e.g. v1.0.1 — must already exist on the repo)
         required: true
-        default: v1.0.1
+        default: v1.1.0
 
 permissions:
   contents: write

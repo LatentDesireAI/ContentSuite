@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="assets/contentsuite_icon.png" alt="ContentSuite" width="96">
+
 # ContentSuite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+</div>
 
 Desktop app for **Windows** and **Linux** that prepares images and video for **Patreon**, **Pixiv**, and **X**.
 

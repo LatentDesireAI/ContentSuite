@@ -29,6 +29,10 @@ datas: list = []
 for subdir in _plugin_dirs:
     datas += collect_data_files("PySide6", subdir=os.path.join("plugins", subdir))
 datas += collect_data_files("PIL")
+datas += [
+    ("assets/contentsuite_icon.png", "assets"),
+    ("assets/contentsuite.ico", "assets"),
+]
 
 binaries = collect_dynamic_libs("PySide6")
 
@@ -66,6 +70,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon="assets/contentsuite.ico",
 )
 
 coll = COLLECT(
