@@ -1,0 +1,62 @@
+# ContentSuite — AGENTS.md
+
+## Project overview
+Windows desktop app for preparing content for **Patreon**, **Pixiv**, **X**, and **Bluesky**.
+
+Stack: Python 3.11+, PySide6 (GUI), ffmpeg (video), Pillow (images + PDF), JSON config in `%APPDATA%`.
+
+UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `core/i18n_catalog.py`.
+
+## Architecture
+- `main.py` — QApplication entry point, main window with QTabWidget
+- `tabs/images_tab.py` — images: compress, metadata strip, PDF
+- `tabs/pixiv_preview_tab.py` — Pixiv collage cover (up to 3 artworks)
+- `tabs/video_tab.py` — video: watermark, convert, GIF, ugoira
+- `tabs/pixiv_censor_tab.py` — Pixiv video censor export
+- `core/pixiv_preview.py` — collage layouts on white background
+- `core/compress.py` — image compression, metadata stripping, optional original filenames
+- `core/pdf_export.py` — multi-page PDF via Pillow
+- `core/watermark.py` — shared watermark logic (position, opacity) for images + video
+- `core/ffmpeg_wrapper.py` — codec probe, convert, GIF, ugoira export
+- `core/config_store.py` — persistent settings (folders, watermarks, quality)
+- `core/i18n.py` — UI translation manager
+- `ui/image_grid.py` — image tile grid with hover preview
+- `ui/clip_grid.py` — video clip grid with hover preview (QMediaPlayer)
+- `ui/language_selector.py` — language switcher in toolbar
+
+## Development rules (important for agents)
+1. Each tab is an independent module — test separately before moving on.
+2. Do **not** rewrite working modules when adding features — extend via new functions/classes
+   while keeping public signatures backward-compatible.
+3. Shared logic (watermark, ffmpeg, config, i18n) lives in `core/` — do not duplicate between tabs.
+4. All user settings (folders, watermarks, compression params, `ui_language`) are persistent via
+   `core/config_store.py`, never hardcoded.
+5. Before implementing a feature, check the implementation status section below.
+6. User-facing strings go through `tr("key")` in `core/i18n_catalog.py` (EN/RU/JA).
+
+## Implementation status (update after each milestone)
+- [x] Stage 1: basic shell, QTabWidget, input/output folder pickers
+- [x] Stage 2: image compression + metadata removal (images_tab)
+- [x] Stage 3: PDF export via Pillow
+- [x] Pixiv preview: collage cover up to 3 artworks on white background
+- [ ] Stage 4: watermark picker for images (position/opacity UI)
+- [x] Stage 5: video_tab — codec probe (ffprobe), video watermark
+- [x] Stage 6: GIF export (fps / width)
+- [x] Stage 7: mp4/webm/mov convert, metadata removal, audio on/off
+- [x] Stage 8: ugoira export (frames + animation.json), optional watermark
+- [x] Stage 9: clip grid with hover preview + audio
+- [x] Stage 10 (partial): persistent config for watermarks and video settings
+- [x] Pixiv censor tab: zone editor + export to pixiv/
+- [x] i18n: EN / RU / JA with toolbar language selector
+- [x] Image grid hover preview with active-window guard
+- [x] Optional keep-original-filename on image export
+
+## Watermark details
+- Position is in % of frame (0.0–1.0 on X/Y), not pixels — works at any resolution.
+- Opacity: alpha 0–100, applied via ffmpeg `overlay` + `colorchannelmixer` or Pillow alpha paste.
+- Watermark file list is stored as paths in config; UI uses dropdown + “Add…”.
+
+## ffmpeg wrapper requirements
+- Before convert: `ffprobe` for input codec/container; wrap all subprocess calls in try/except;
+  never crash the GUI — log errors to the log panel.
+- Ugoira: export frames + `.json` (frame delays), compatible with Pixiv upload format.

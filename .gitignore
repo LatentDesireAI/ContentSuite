@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini
+
+# Local debug / test assets
+_test_*.png
+_debug_*.png
+_fixed_*.png
+_test_cover.png
+_smoke_test.py
+_pdf_test/
+_import_test.py
+_test_names.py
+
+# Cursor / agent runtime
+mcps/
+terminals/
+instructions.txt
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
