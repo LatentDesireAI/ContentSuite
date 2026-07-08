@@ -21,13 +21,20 @@ from PySide6.QtWidgets import (
 )
 
 from core.app_log import get_logger
-from core.censor import CensorStore, apply_video_censor
+from core.censor import (
+    CensorStore,
+    apply_image_censor,
+    apply_video_censor,
+    collect_censor_media,
+    is_image_path,
+    is_video_path,
+)
 from core.config_store import ConfigStore
-from core.ffmpeg_wrapper import VideoBatchSummary, VideoJobResult, check_ffmpeg, collect_videos
+from core.ffmpeg_wrapper import VideoBatchSummary, VideoJobResult, check_ffmpeg
 from core.i18n import I18n, tr
 from tabs.base_tab import BaseTab
 from ui.censor_editor_dialog import CensorEditorDialog
-from ui.clip_grid import ClipGrid
+from ui.censor_media_grid import CensorMediaGrid
 
 
 class CensorBatchWorker(QThread):
@@ -72,22 +79,36 @@ class CensorBatchWorker(QThread):
                     self.progress.emit(index, total)
                     continue
 
-                out_name = f"{self.base_name}_{index}.mp4"
+                if is_image_path(source):
+                    out_name = f"{self.base_name}_{index}.jpg"
+                else:
+                    out_name = f"{self.base_name}_{index}.mp4"
                 out_path = Path(self.output_dir) / "pixiv" / out_name
+                kind = "img" if is_image_path(source) else "vid"
                 self.log_line.emit(
-                    f"[{index}/{total}] {source.name} → pixiv/{out_name} "
+                    f"[{index}/{total}] {source.name} ({kind}) → pixiv/{out_name} "
                     f"({len(zones)} зон)"
                 )
-                apply_video_censor(
-                    source,
-                    out_path,
-                    zones,
-                    output_format="mp4",
-                    compression_level=self.options.get("compression_level", "medium"),
-                    remove_metadata=self.options.get("remove_metadata", True),
-                    author_meta=self.options.get("author_meta"),
-                    title=f"{self.base_name}_{index}",
-                )
+
+                if is_image_path(source):
+                    apply_image_censor(
+                        source,
+                        out_path,
+                        zones,
+                        remove_metadata=self.options.get("remove_metadata", True),
+                        author_meta=self.options.get("author_meta"),
+                    )
+                else:
+                    apply_video_censor(
+                        source,
+                        out_path,
+                        zones,
+                        output_format="mp4",
+                        compression_level=self.options.get("compression_level", "medium"),
+                        remove_metadata=self.options.get("remove_metadata", True),
+                        author_meta=self.options.get("author_meta"),
+                        title=f"{self.base_name}_{index}",
+                    )
                 results.append(VideoJobResult(source, out_path, True))
                 self.progress.emit(index, total)
 
@@ -166,9 +187,9 @@ class PixivCensorTab(BaseTab):
         self._hint.setWordWrap(True)
         self._hint.setStyleSheet("color: #666;")
 
-        self.clip_grid = ClipGrid()
-        self.clip_grid.selection_changed.connect(self._update_buttons)
-        self.clip_grid.load_finished.connect(self._on_clips_loaded)
+        self.media_grid = CensorMediaGrid()
+        self.media_grid.selection_changed.connect(self._update_buttons)
+        self.media_grid.load_finished.connect(self._on_media_loaded)
 
         row_actions = QHBoxLayout()
         row_actions.addWidget(self.editor_btn)
@@ -192,7 +213,7 @@ class PixivCensorTab(BaseTab):
         left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         left_scroll.setFrameShape(QFrame.Shape.NoFrame)
 
-        self.clip_grid.setSizePolicy(
+        self.media_grid.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding,
         )
@@ -201,7 +222,7 @@ class PixivCensorTab(BaseTab):
         split.setContentsMargins(0, 0, 0, 0)
         split.setSpacing(10)
         split.addWidget(left_scroll, stretch=1)
-        split.addWidget(self.clip_grid, stretch=2)
+        split.addWidget(self.media_grid, stretch=2)
 
         split_host = QWidget()
         split_host.setLayout(split)
@@ -232,10 +253,10 @@ class PixivCensorTab(BaseTab):
         self._hint.setText(tr("censor.hint"))
 
     def _sources(self) -> list[Path]:
-        return collect_videos(Path(self.input_picker.path()))
+        return collect_censor_media(Path(self.input_picker.path()))
 
     def _selected_sources(self) -> list[Path]:
-        selected = self.clip_grid.selected_paths()
+        selected = self.media_grid.selected_paths()
         if selected:
             return selected
         return self._sources()
@@ -247,27 +268,27 @@ class PixivCensorTab(BaseTab):
         self.editor_btn.setEnabled(not busy)
         self.export_btn.setEnabled(not busy)
         self.progress.setVisible(busy)
-        self.clip_grid.set_interaction_enabled(not busy)
+        self.media_grid.set_interaction_enabled(not busy)
         if not busy:
             self._update_buttons()
 
     def _refresh_file_list(self, _path: str = "") -> None:
         if self._is_busy():
             return
-        self.clip_grid.set_sources(self._sources())
+        self.media_grid.set_sources(self._sources())
         self._update_buttons()
 
-    def _on_clips_loaded(self, _count: int) -> None:
+    def _on_media_loaded(self, _count: int) -> None:
         self._update_buttons()
 
     def _update_buttons(self) -> None:
         if self._is_busy():
             return
-        has_videos = self.clip_grid.has_videos()
+        has_media = self.media_grid.has_media()
         has_output = bool(self.output_picker.path())
-        has_selection = len(self.clip_grid.selected_paths()) == 1
-        self.editor_btn.setEnabled(has_videos and has_selection)
-        self.export_btn.setEnabled(has_videos and has_output)
+        has_selection = bool(self.media_grid.selected_paths())
+        self.editor_btn.setEnabled(has_media and has_selection)
+        self.export_btn.setEnabled(has_media and has_output)
 
     def _validate_base_name(self) -> str | None:
         base_name = self.base_name_edit.text().strip()
@@ -277,32 +298,35 @@ class PixivCensorTab(BaseTab):
         return base_name
 
     def _open_editor(self) -> None:
-        selected = self.clip_grid.selected_paths()
-        if len(selected) != 1:
+        selected = self.media_grid.selected_paths()
+        if not selected:
             QMessageBox.warning(
                 self,
                 tr("common.content_suite"),
-                tr("censor.warn_one_clip"),
+                tr("censor.warn_select_item"),
             )
             return
-        path = selected[0]
-        probe = self.clip_grid.probe_for(path)
         dialog = CensorEditorDialog(
-            path,
-            probe,
-            self._store,
+            selected,
+            video_probe_for=self.media_grid.video_probe_for,
+            store=self._store,
             default_block_size=self.block_spin.value(),
             parent=self,
         )
         if dialog.exec():
-            self.log(f"Цензура сохранена: {path.name} ({len(self._store.get_zones(path))} зон)")
+            for path in selected:
+                zones = self._store.get_zones(path)
+                if zones:
+                    self.log(
+                        f"Цензура сохранена: {path.name} ({len(zones)} зон)"
+                    )
 
     def _start_export(self) -> None:
         sources = self._selected_sources()
         output = self.output_picker.path()
         base_name = self._validate_base_name()
         if not sources:
-            QMessageBox.warning(self, tr("common.content_suite"), tr("censor.warn_no_video"))
+            QMessageBox.warning(self, tr("common.content_suite"), tr("censor.warn_no_media"))
             return
         if not output:
             QMessageBox.warning(self, tr("common.content_suite"), tr("censor.warn_output"))
@@ -335,10 +359,13 @@ class PixivCensorTab(BaseTab):
             ):
                 return
 
+        video_count = sum(1 for p in sources if is_video_path(p))
+        image_count = sum(1 for p in sources if is_image_path(p))
         author_meta = self.config.get_author_metadata()
         self.log_panel.clear()
         self.log(
-            f"Pixiv цензура: {len(sources)} ролик(ов) | пак «{base_name}» → pixiv/"
+            f"Pixiv цензура: {video_count} видео, {image_count} изображений | "
+            f"пак «{base_name}» → pixiv/"
         )
         self._set_busy(True)
         self.progress.setMaximum(len(sources))

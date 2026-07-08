@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from core.app_log import get_logger
 from core.i18n import I18n, tr
+from ui.preview_placement import compute_hover_preview_layout, media_aspect
 from core.ffmpeg_wrapper import (
     FfmpegError,
     VideoProbe,
@@ -148,7 +149,20 @@ class HoverPreviewPopup(QFrame):
         self._current_path = path
 
         screen = anchor.screen().availableGeometry()
-        video_w, video_h = _preview_dimensions(probe, screen.width(), screen.height())
+        tile_rect = QRect(
+            anchor.mapToGlobal(anchor.rect().topLeft()),
+            anchor.size(),
+        )
+        aspect = media_aspect(
+            probe.width if probe else 0,
+            probe.height if probe else 0,
+        )
+        video_w, video_h, x, y = compute_hover_preview_layout(
+            tile_rect,
+            screen,
+            aspect,
+            frame_pad=PREVIEW_FRAME_PAD,
+        )
         pad = PREVIEW_FRAME_PAD * 2
         popup_w = video_w + pad
         popup_h = video_h + pad
@@ -158,18 +172,6 @@ class HoverPreviewPopup(QFrame):
 
         self._player.setSource(QUrl.fromLocalFile(str(path.resolve())))
         self._player.play()
-
-        tile_tl = anchor.mapToGlobal(anchor.rect().topLeft())
-        tile_tr = anchor.mapToGlobal(anchor.rect().topRight())
-        x = tile_tr.x() + 8
-        y = tile_tl.y()
-
-        if x + popup_w > screen.right():
-            x = tile_tl.x() - popup_w - 8
-        if x < screen.left():
-            x = screen.left() + 8
-        if y + popup_h > screen.bottom():
-            y = max(screen.top() + 8, screen.bottom() - popup_h - 8)
 
         self.move(x, y)
         self.show()

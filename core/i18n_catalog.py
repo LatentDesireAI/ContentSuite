@@ -212,7 +212,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.done_ugoira": (
             "Ugoira: {clips} clip(s), {chunks} parts, {frames} frames\n{path}"
         ),
-        "censor.input": "Input (video):",
+        "censor.input": "Input (video/images):",
         "censor.output": "Output (Pixiv):",
         "censor.pack_group": "Pack name",
         "censor.pack_prefix": "Prefix:",
@@ -223,22 +223,40 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.btn_editor": "Censor editor…",
         "censor.btn_export": "Export with censor → pixiv/",
         "censor.hint": (
-            "1) Select a clip · 2) “Censor editor” — drag over the area · "
-            "3) “Export” → pixiv/name_1.mp4. Zones are static for the whole clip."
+            "1) Select file(s) — Ctrl+click for several · 2) “Censor editor” — lasso each "
+            "(←/→ between files) · 3) “Export” → pixiv/. "
+            "Videos first in the grid, then images."
+        ),
+        "censor.grid_hint": (
+            "Videos first, then images. Ctrl+click or Shift+click to select several; "
+            "hover for preview."
+        ),
+        "censor.warn_select_item": "Select at least one video or image.",
+        "censor.editor_prev": "← Previous",
+        "censor.editor_next": "Next →",
+        "censor.editor_nav": "File {cur} of {total}",
+        "censor.editor_title_batch": "Censor — {name} ({cur}/{total})",
+        "censor.badge_image": "IMG",
+        "censor.no_media": "No videos or images",
+        "censor.media_count": "Videos: {videos}, images: {images}",
+        "censor.media_count_selected": (
+            "Videos: {videos}, images: {images}, selected {selected}"
         ),
         "censor.warn_pack_name": "Enter a pack name (prefix).",
-        "censor.warn_one_clip": "Select one clip for the censor editor.",
-        "censor.warn_no_video": "No videos to export.",
+        "censor.warn_one_item": "Select one video or image for the censor editor.",
+        "censor.warn_no_media": "No videos or images to export.",
         "censor.warn_output": "Select an output folder.",
         "censor.missing_zones": (
-            "{count} clip(s) have no censor zones ({names}{extra}).\n"
+            "{count} file(s) have no censor zones ({names}{extra}).\n"
             "Continue and skip them?"
         ),
         "censor.and_more": " and {n} more",
         "censor.done": "Export: {done} of {total}\n{path}",
         "censor.editor_title": "Censor — {name}",
         "censor.editor_hint": (
-            "Drag over the area to censor. Zones apply to the entire clip (static censor)."
+            "Hold the left mouse button and outline the area (lasso). "
+            "The contour closes automatically. Zones apply to the entire video clip "
+            "or the full image."
         ),
         "censor.editor_frame": "Frame:",
         "censor.editor_block": "Pixel size:",
@@ -246,10 +264,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.editor_zones": "Zones:",
         "censor.editor_remove": "Remove zone",
         "censor.editor_clear": "Clear all",
-        "censor.editor_clear_confirm": "Remove all censor zones for this clip?",
-        "censor.editor_need_zone": "Add at least one zone (drag on the frame).",
+        "censor.editor_clear_confirm": "Remove all censor zones for this file?",
+        "censor.editor_need_zone": "Add at least one zone (lasso on the frame).",
         "censor.editor_frame_fail": "Could not load frame:\n{error}",
         "censor.zone_item": "#{n}: {w}×{h} @ ({x}, {y}), pixel {block}",
+        "censor.zone_item_lasso": "#{n}: lasso ({points} pts), pixel {block}",
         "author.title": "Author & metadata",
         "author.intro": (
             "These fields are written to JPEG (EXIF), PDF, and video (mp4/webm): author, "
@@ -497,7 +516,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.done_ugoira": (
             "Ugoira: {clips} ролик(ов), {chunks} частей, {frames} кадров\n{path}"
         ),
-        "censor.input": "Вход (видео):",
+        "censor.input": "Вход (видео/картинки):",
         "censor.output": "Выход (Pixiv):",
         "censor.pack_group": "Имя пака",
         "censor.pack_prefix": "Префикс:",
@@ -508,23 +527,39 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.btn_editor": "Редактор цензуры…",
         "censor.btn_export": "Экспорт с цензурой → pixiv/",
         "censor.hint": (
-            "1) Выберите ролик · 2) «Редактор цензуры» — потяните мышью по области · "
-            "3) «Экспорт» → папка pixiv/имя_1.mp4. Зоны статичны на весь ролик."
+            "1) Выберите файл(ы) — Ctrl+клик для нескольких · 2) «Редактор цензуры» — "
+            "лассо на каждом (←/→ между файлами) · 3) «Экспорт» → pixiv/. "
+            "Сначала видео в сетке, потом картинки."
+        ),
+        "censor.grid_hint": (
+            "Сначала видео, потом картинки. Ctrl+клик или Shift+клик — несколько файлов; "
+            "наведите для превью."
+        ),
+        "censor.warn_select_item": "Выберите хотя бы одно видео или картинку.",
+        "censor.editor_prev": "← Назад",
+        "censor.editor_next": "Далее →",
+        "censor.editor_nav": "Файл {cur} из {total}",
+        "censor.editor_title_batch": "Цензура — {name} ({cur}/{total})",
+        "censor.badge_image": "IMG",
+        "censor.no_media": "Нет видео и картинок",
+        "censor.media_count": "Видео: {videos}, картинок: {images}",
+        "censor.media_count_selected": (
+            "Видео: {videos}, картинок: {images}, выбрано {selected}"
         ),
         "censor.warn_pack_name": "Укажите имя пака (префикс).",
-        "censor.warn_one_clip": "Выберите один ролик для редактора цензуры.",
-        "censor.warn_no_video": "Нет видео для экспорта.",
+        "censor.warn_one_item": "Выберите одно видео или картинку для редактора цензуры.",
+        "censor.warn_no_media": "Нет видео или картинок для экспорта.",
         "censor.warn_output": "Укажите выходную папку.",
         "censor.missing_zones": (
-            "У {count} ролик(ов) нет зон цензуры ({names}{extra}).\n"
+            "У {count} файл(ов) нет зон цензуры ({names}{extra}).\n"
             "Продолжить и пропустить их?"
         ),
         "censor.and_more": " и ещё {n}",
         "censor.done": "Экспорт: {done} из {total}\n{path}",
         "censor.editor_title": "Цензура — {name}",
         "censor.editor_hint": (
-            "Потяните мышью по области, которую нужно замазать. "
-            "Зоны применяются ко всему ролику (статичная цензура)."
+            "Зажмите ЛКМ и обведите область (лассо). Контур автоматически замыкается. "
+            "Зоны действуют на весь ролик или на всё изображение."
         ),
         "censor.editor_frame": "Кадр:",
         "censor.editor_block": "Размер пикселей:",
@@ -532,10 +567,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.editor_zones": "Зоны:",
         "censor.editor_remove": "Удалить зону",
         "censor.editor_clear": "Очистить все",
-        "censor.editor_clear_confirm": "Удалить все зоны цензуры для этого ролика?",
-        "censor.editor_need_zone": "Добавьте хотя бы одну зону (потяните мышью по кадру).",
+        "censor.editor_clear_confirm": "Удалить все зоны цензуры для этого файла?",
+        "censor.editor_need_zone": "Добавьте хотя бы одну зону (лассо по кадру).",
         "censor.editor_frame_fail": "Не удалось загрузить кадр:\n{error}",
         "censor.zone_item": "#{n}: {w}×{h} @ ({x}, {y}), пиксель {block}",
+        "censor.zone_item_lasso": "#{n}: лассо ({points} точек), пиксель {block}",
         "author.title": "Автор и метаданные",
         "author.intro": (
             "Эти данные записываются в JPEG (EXIF), PDF и видео (mp4/webm): автор, "
@@ -776,7 +812,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.done_ugoira": (
             "Ugoira: {clips} 本, {chunks} パート, {frames} フレーム\n{path}"
         ),
-        "censor.input": "入力（動画）:",
+        "censor.input": "入力（動画/画像）:",
         "censor.output": "出力 (Pixiv):",
         "censor.pack_group": "パック名",
         "censor.pack_prefix": "プレフィックス:",
@@ -787,22 +823,37 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.btn_editor": "モザイクエディタ…",
         "censor.btn_export": "モザイク付きエクスポート → pixiv/",
         "censor.hint": (
-            "1) クリップ選択 · 2) 「モザイクエディタ」— 範囲をドラッグ · "
-            "3) 「エクスポート」→ pixiv/name_1.mp4。ゾーンはクリップ全体に固定。"
+            "1) ファイル選択 — 複数はCtrl+クリック · 2) 「モザイクエディタ」— 各ファイルにラッソ "
+            "（←/→で切替） · 3) 「エクスポート」→ pixiv/。グリッドは動画→画像の順。"
+        ),
+        "censor.grid_hint": (
+            "動画→画像の順。Ctrl+クリックまたはShift+クリックで複数選択、ホバーでプレビュー。"
+        ),
+        "censor.warn_select_item": "動画または画像を1つ以上選択してください。",
+        "censor.editor_prev": "← 前へ",
+        "censor.editor_next": "次へ →",
+        "censor.editor_nav": "ファイル {cur} / {total}",
+        "censor.editor_title_batch": "モザイク — {name} ({cur}/{total})",
+        "censor.badge_image": "IMG",
+        "censor.no_media": "動画・画像なし",
+        "censor.media_count": "動画: {videos}、画像: {images}",
+        "censor.media_count_selected": (
+            "動画: {videos}、画像: {images}、選択 {selected}"
         ),
         "censor.warn_pack_name": "パック名（プレフィックス）を入力してください。",
-        "censor.warn_one_clip": "モザイクエディタ用に1本選択してください。",
-        "censor.warn_no_video": "エクスポートする動画がありません。",
+        "censor.warn_one_item": "モザイクエディタ用に動画または画像を1つ選択してください。",
+        "censor.warn_no_media": "エクスポートする動画・画像がありません。",
         "censor.warn_output": "出力フォルダを指定してください。",
         "censor.missing_zones": (
-            "{count} 本にモザイクゾーンがありません ({names}{extra})。\n"
+            "{count} 件にモザイクゾーンがありません ({names}{extra})。\n"
             "続行してスキップしますか？"
         ),
         "censor.and_more": " 他{n}本",
         "censor.done": "エクスポート: {done} / {total}\n{path}",
         "censor.editor_title": "モザイク — {name}",
         "censor.editor_hint": (
-            "モザイクしたい範囲をドラッグ。ゾーンはクリップ全体に適用（固定モザイク）。"
+            "左クリック長押しで範囲をなぞる（ラッソ）。輪郭は自動で閉じます。"
+            "ゾーンは動画クリップ全体または画像全体に適用。"
         ),
         "censor.editor_frame": "フレーム:",
         "censor.editor_block": "ピクセルサイズ:",
@@ -810,10 +861,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "censor.editor_zones": "ゾーン:",
         "censor.editor_remove": "ゾーン削除",
         "censor.editor_clear": "すべてクリア",
-        "censor.editor_clear_confirm": "このクリップのモザイクゾーンをすべて削除しますか？",
-        "censor.editor_need_zone": "ゾーンを1つ以上追加（フレーム上でドラッグ）。",
+        "censor.editor_clear_confirm": "このファイルのモザイクゾーンをすべて削除しますか？",
+        "censor.editor_need_zone": "ゾーンを1つ以上追加（ラッソでなぞる）。",
         "censor.editor_frame_fail": "フレームを読み込めませんでした:\n{error}",
         "censor.zone_item": "#{n}: {w}×{h} @ ({x}, {y}), ピクセル {block}",
+        "censor.zone_item_lasso": "#{n}: ラッソ ({points}点), ピクセル {block}",
         "author.title": "作者とメタデータ",
         "author.intro": (
             "JPEG (EXIF)、PDF、動画 (mp4/webm) に書き込み: 作者、著作権、説明、Patreonリンク。"

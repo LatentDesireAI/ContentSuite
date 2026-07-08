@@ -27,7 +27,11 @@ Free to download and use. Built for creators who publish on multiple platforms.
 - Metadata removal, audio on/off
 
 ### Pixiv Censor
-- Blur/block censoring on video with manual zone editor
+- **Lasso** censorship on video and still images — hold LMB to outline an area; contour auto-closes
+- One input folder for **video and images**; grid shows clips first, then artworks
+- **Multi-file editor** — Ctrl+click to select several files, ←/→ to set zones on each
+- Export to `pixiv/` as `name_1.mp4`, `name_2.jpg`, … (shared pack prefix)
+- Adjustable mosaic pixel size (typical 12–24 for Pixiv)
 
 Settings (folders, watermarks, image/video quality, compression level, author EXIF) are stored in `%APPDATA%\ContentSuite\config.json`.
 
@@ -58,8 +62,8 @@ python -m venv .venv
 ```
 main.py              — application entry point
 tabs/                — UI tabs (images, video, pixiv preview, censor)
-core/                — compression, ffmpeg, watermark, config, PDF
-ui/                  — reusable widgets (grids, dialogs, pickers)
+core/                — compression, censor, ffmpeg, watermark, config, PDF
+ui/                  — grids, censor editor, dialogs, pickers
 ```
 
 ## Authors

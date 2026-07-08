@@ -12,7 +12,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `tabs/images_tab.py` — images: compress, metadata strip, PDF
 - `tabs/pixiv_preview_tab.py` — Pixiv collage cover (up to 3 artworks)
 - `tabs/video_tab.py` — video: watermark, convert, GIF, ugoira, compression level UI
-- `tabs/pixiv_censor_tab.py` — Pixiv video censor export
+- `tabs/pixiv_censor_tab.py` — Pixiv censor export (video + images, lasso zones)
 - `core/pixiv_preview.py` — collage layouts on white background
 - `core/compress.py` — image compression, metadata stripping, optional original filenames
 - `core/pdf_export.py` — multi-page PDF via Pillow
@@ -23,6 +23,9 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `core/i18n.py` — UI translation manager
 - `ui/image_grid.py` — image tile grid with hover preview
 - `ui/clip_grid.py` — video clip grid with hover preview (QMediaPlayer)
+- `ui/censor_media_grid.py` — mixed video + image grid for Pixiv censor tab
+- `ui/censor_editor_dialog.py` — lasso zone editor (video frame or still image)
+- `core/censor.py` — mosaic zones (polygon lasso + legacy rect), video/image export
 - `ui/language_selector.py` — language switcher in toolbar
 
 ## Development rules (important for agents)
@@ -48,7 +51,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - [x] Stage 8: ugoira export (frames + animation.json), optional watermark
 - [x] Stage 9: clip grid with hover preview + audio
 - [x] Stage 10 (partial): persistent config for watermarks and video settings
-- [x] Pixiv censor tab: zone editor + export to pixiv/
+- [x] Pixiv censor tab: lasso zone editor, video + images, export to pixiv/
 - [x] i18n: EN / RU / JA with toolbar language selector
 - [x] Image grid hover preview with active-window guard
 - [x] Optional keep-original-filename on image export
@@ -57,6 +60,15 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - Position is in % of frame (0.0–1.0 on X/Y), not pixels — works at any resolution.
 - Opacity: alpha 0–100, applied via ffmpeg `overlay` + `colorchannelmixer` or Pillow alpha paste.
 - Watermark file list is stored as paths in config; UI uses dropdown + “Add…”.
+
+## Pixiv censor
+- Input folder: videos and images together (`collect_censor_media` — videos first, then images).
+- Zones: lasso polygon (`CensorZone.polygon`); hold LMB in editor, contour auto-closes.
+- Legacy rect zones in `censor_zones.json` still export correctly.
+- Editor: `CensorEditorDialog` accepts multiple selected paths; ←/→ navigates, zones auto-save on switch.
+- Video export: `apply_video_censor` — ffmpeg mask per zone, output `pixiv/name_N.mp4`.
+- Image export: `apply_image_censor` — Pillow mosaic inside polygon, output `pixiv/name_N.jpg`.
+- Block size (pixel mosaic) — `pixiv_censor_block_size` in config; default 18.
 
 ## Video compression
 - Presets in `core/video_compression.py`: `maximum`, `high`, `medium`, `near_lossless`, `minimal`.
