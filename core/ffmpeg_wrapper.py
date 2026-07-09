@@ -6,7 +6,10 @@ import hashlib
 import json
 import math
 import os
+import shutil
 import subprocess
+import tempfile
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -22,7 +25,10 @@ from core.metadata import (
 from core.video_compression import (
     DEFAULT_COMPRESSION_ID,
     ffmpeg_audio_encode_args,
+    ffmpeg_container_mux_args,
+    ffmpeg_mobile_video_prep_args,
     ffmpeg_video_encode_args,
+    is_mp4_video_copy_safe,
 )
 from core.watermark import (
     WatermarkSettings,
@@ -47,6 +53,8 @@ class VideoProbe:
     width: int
     height: int
     video_codec: str
+    pix_fmt: str
+    profile: str
     audio_codec: str | None
     container: str
     bitrate: int | None
@@ -154,6 +162,8 @@ def probe_video(path: Path) -> VideoProbe:
         width=int(video_stream.get("width", 0) or 0),
         height=int(video_stream.get("height", 0) or 0),
         video_codec=video_stream.get("codec_name", "unknown"),
+        pix_fmt=video_stream.get("pix_fmt", "") or "",
+        profile=video_stream.get("profile", "") or "",
         audio_codec=audio_stream.get("codec_name") if audio_stream else None,
         container=fmt.get("format_name", path.suffix.lstrip(".")).split(",")[0],
         bitrate=bitrate,
@@ -224,6 +234,69 @@ def run_ffmpeg(args: list[str], *, quiet: bool = True) -> None:
         raise FfmpegError(tail or str(exc)) from exc
     except FileNotFoundError as exc:
         raise FfmpegError("ffmpeg not found in PATH") from exc
+
+
+def _encode_temp_path(output_path: Path) -> Path:
+    temp_dir = Path(tempfile.gettempdir()) / "ContentSuite" / "encode"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    return temp_dir / f"{uuid.uuid4().hex}{output_path.suffix.lower()}"
+
+
+def validate_video_output(path: Path) -> VideoProbe:
+    """Raise if the file is truncated or missing a playable video stream."""
+    if not path.is_file():
+        raise FfmpegError(f"Output file missing: {path.name}")
+    size = path.stat().st_size
+    if size < 4096:
+        raise FfmpegError(f"Output file too small ({size} bytes): {path.name}")
+    try:
+        probe = probe_video(path)
+    except FfmpegError as exc:
+        raise FfmpegError(
+            f"Output unreadable (truncated or corrupt): {path.name}: {exc}"
+        ) from exc
+    if probe.width <= 0 or probe.height <= 0:
+        raise FfmpegError(f"Output has no video stream: {path.name}")
+    if probe.duration <= 0:
+        raise FfmpegError(f"Output has invalid duration: {path.name}")
+    return probe
+
+
+def run_ffmpeg_to_file(args: list[str], output_path: Path, *, retries: int = 1) -> None:
+    """Encode to a local temp file, validate, then atomically replace output."""
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        temp_out = _encode_temp_path(output_path)
+        try:
+            run_ffmpeg([*args, str(temp_out)])
+            probe = validate_video_output(temp_out)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            if output_path.exists():
+                output_path.unlink()
+            shutil.move(str(temp_out), str(output_path))
+            if output_path.suffix.lower() in (".mp4", ".mov", ".m4v"):
+                get_logger().info(
+                    "Video output %s: %s %s %s (%d bytes)",
+                    output_path.name,
+                    probe.video_codec,
+                    probe.pix_fmt or "?",
+                    probe.profile or "",
+                    output_path.stat().st_size,
+                )
+            return
+        except (FfmpegError, OSError) as exc:
+            last_error = exc
+            if temp_out.exists():
+                temp_out.unlink()
+            if attempt < retries:
+                get_logger().warning(
+                    "Retrying %s after encode error (attempt %d): %s",
+                    output_path.name,
+                    attempt + 2,
+                    exc,
+                )
+    if last_error is not None:
+        raise last_error
 
 
 JOB_OUTPUT_SUBDIR = {
@@ -314,8 +387,8 @@ def apply_watermark(
         author_meta=author_meta,
         title=title,
     )
-    args.append(str(output_path))
-    run_ffmpeg(args)
+    args.extend(ffmpeg_container_mux_args(output_format))
+    run_ffmpeg_to_file(args, output_path)
 
 
 def export_gif(
@@ -370,8 +443,7 @@ def patch_video_metadata(
         author_meta=author_meta,
         title=title or input_path.stem,
     )
-    args.append(str(output_path))
-    run_ffmpeg(args)
+    run_ffmpeg_to_file(args, output_path)
 
 
 def convert_video(
@@ -387,15 +459,35 @@ def convert_video(
     title: str = "",
 ) -> None:
     fmt = output_format.lower().lstrip(".")
-    args = ["-i", str(input_path)]
+    probe = probe_video(input_path)
 
-    if reencode or fmt == "webm":
+    needs_reencode = reencode or fmt == "webm"
+    if fmt in ("mp4", "mov", "m4v") and not needs_reencode:
+        if not is_mp4_video_copy_safe(
+            probe.video_codec,
+            pix_fmt=probe.pix_fmt,
+            profile=probe.profile,
+        ):
+            get_logger().info(
+                "Auto re-encoding %s for %s compatibility (codec=%s, pix_fmt=%s)",
+                input_path.name,
+                fmt.upper(),
+                probe.video_codec,
+                probe.pix_fmt or "?",
+            )
+            needs_reencode = True
+
+    args = ["-i", str(input_path), "-map", "0:v:0"]
+
+    if needs_reencode:
+        if fmt in ("mp4", "mov", "m4v"):
+            args.extend(ffmpeg_mobile_video_prep_args(fmt))
         args.extend(ffmpeg_video_encode_args(fmt, compression_level))
     else:
         args.extend(["-c:v", "copy"])
 
-    probe = probe_video(input_path)
     if keep_audio and probe.has_audio:
+        args.extend(["-map", "0:a?"])
         args.extend(ffmpeg_audio_encode_args(fmt))
     else:
         args.append("-an")
@@ -406,9 +498,8 @@ def convert_video(
         author_meta=author_meta,
         title=title,
     )
-
-    args.append(str(output_path))
-    run_ffmpeg(args)
+    args.extend(ffmpeg_container_mux_args(fmt))
+    run_ffmpeg_to_file(args, output_path)
 
 
 PIXIV_UGOIRA_DEFAULT_MAX_MB = 30

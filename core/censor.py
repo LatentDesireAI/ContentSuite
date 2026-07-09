@@ -18,6 +18,7 @@ from core.ffmpeg_wrapper import (
     collect_videos,
     probe_video,
     run_ffmpeg,
+    run_ffmpeg_to_file,
 )
 from core.metadata import (
     AuthorMetadata,
@@ -25,7 +26,11 @@ from core.metadata import (
     build_ffmpeg_metadata_flags,
     should_strip_media_metadata,
 )
-from core.video_compression import DEFAULT_COMPRESSION_ID, ffmpeg_video_encode_args
+from core.video_compression import (
+    DEFAULT_COMPRESSION_ID,
+    ffmpeg_container_mux_args,
+    ffmpeg_video_encode_args,
+)
 
 
 @dataclass
@@ -306,10 +311,9 @@ def apply_video_censor(
         args.extend(
             build_ffmpeg_metadata_flags(author_meta, title=title or input_path.stem)
         )
+        args.extend(ffmpeg_container_mux_args(fmt))
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        args.append(str(output_path))
-        run_ffmpeg(args)
+        run_ffmpeg_to_file(args, output_path)
 
 
 def apply_image_censor(
