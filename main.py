@@ -15,6 +15,7 @@ from core.branding import apply_windows_app_identity, load_app_icon
 from core.credits import AI_ASSISTED_LABEL
 from core.i18n import I18n, init_language, tr
 from core.thumb_cache import prune_all_thumbnail_caches
+from tabs.art_checker_tab import ArtCheckerTab
 from tabs.images_tab import ImagesTab
 from tabs.pixiv_censor_tab import PixivCensorTab
 from tabs.pixiv_preview_tab import PixivPreviewTab
@@ -28,6 +29,7 @@ _TAB_KEYS = (
     "tab.pixiv_preview",
     "tab.video",
     "tab.pixiv_censor",
+    "tab.art_checker",
 )
 
 
@@ -47,6 +49,7 @@ class MainWindow(QMainWindow):
             PixivPreviewTab(self.config),
             VideoTab(self.config),
             PixivCensorTab(self.config),
+            ArtCheckerTab(self.config),
         )
         for widget in self._tab_widgets:
             self.tabs.addTab(widget, "")

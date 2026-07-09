@@ -15,6 +15,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "tab.pixiv_preview": "Pixiv Preview",
         "tab.video": "Video",
         "tab.pixiv_censor": "Pixiv Censor",
+        "tab.art_checker": "Art Checker",
         "common.browse": "Browse…",
         "common.content_suite": "ContentSuite",
         "common.add": "Add…",
@@ -39,6 +40,69 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.not_selected": "(not selected)",
         "folder.placeholder": "Choose a folder…",
         "folder.dialog": "Choose folder — {label}",
+        "file.placeholder": "Choose a file…",
+        "file.dialog": "Choose file — {label}",
+        "file.filter_json": "JSON (*.json);;All (*.*)",
+        "art_checker.json": "Prompt book (JSON):",
+        "art_checker.scan_folder": "Scan folder:",
+        "art_checker.refresh": "Refresh",
+        "art_checker.auto_watch": "Watch folder for changes",
+        "art_checker.auto_watch_tip": (
+            "Re-scan automatically when files are added, removed, or renamed in the scan folder."
+        ),
+        "art_checker.filter": "Filter:",
+        "art_checker.sort": "Sort:",
+        "art_checker.sort_name": "Name",
+        "art_checker.sort_date": "Date (newest)",
+        "art_checker.sort_missing_first": "Missing first",
+        "art_checker.search": "Search:",
+        "art_checker.copy_name": "Copy selected name",
+        "art_checker.copy_missing": "Copy all missing",
+        "art_checker.extra_group": "Extra files (not in JSON)",
+        "art_checker.arts_group": "Arts",
+        "art_checker.col_index": "#",
+        "art_checker.col_status": "Status",
+        "art_checker.col_section": "Section",
+        "art_checker.col_name": "Name",
+        "art_checker.col_files": "Files found",
+        "art_checker.filter_all": "All",
+        "art_checker.filter_missing": "Missing",
+        "art_checker.filter_present": "Present",
+        "art_checker.filter_sfw": "sfw",
+        "art_checker.filter_nsfw": "nsfw",
+        "art_checker.filter_sex": "sex",
+        "art_checker.status_present": "OK",
+        "art_checker.status_missing": "MISS",
+        "art_checker.summary_idle": "Choose a JSON file and scan folder, then press Refresh.",
+        "art_checker.summary": (
+            "JSON: {total} arts · unique files: {files} · "
+            "present: {present} · missing: {missing} · extra: {extra}"
+        ),
+        "art_checker.extra_none": "No extra files.",
+        "art_checker.extra_more": "\n… and {count} more",
+        "art_checker.preview_idle": "Select an art to preview.",
+        "art_checker.preview_missing": "Missing: {name}\nExpected: {path}",
+        "art_checker.preview_missing_file": "File listed in JSON scan but not found on disk.",
+        "art_checker.preview_load_error": "Could not load preview image.",
+        "art_checker.warn_json": "Select a valid prompt book JSON file.",
+        "art_checker.scan_done": (
+            "Scan complete — present: {present}, missing: {missing}, extra: {extra}"
+        ),
+        "art_checker.copied_one": "Copied: {name}",
+        "art_checker.copied_missing": "Copied {count} missing name(s)",
+        "art_checker.grid_hint": (
+            "Click to select · double-click to copy name · hover for preview · "
+            "scroll wheel on stacked tiles to browse variants"
+        ),
+        "art_checker.variants_wheel": (
+            "{current}/{count} variants — scroll wheel to browse"
+        ),
+        "art_checker.grid_empty": "No arts to show.",
+        "art_checker.grid_count": "{count} arts · OK: {present} · MISS: {missing}",
+        "art_checker.grid_count_selected": (
+            "{count} arts · OK: {present} · MISS: {missing} · selected: {selected}"
+        ),
+        "art_checker.tile_missing": "MISSING",
         "images.input": "Input (images):",
         "images.output": "Output (images):",
         "images.group_compress": "Image compression",
@@ -364,6 +428,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "grid.hint": (
             "Preview: hover · select: click (one) · Ctrl+click (toggle) · Shift+click (range)"
         ),
+        "grid.sort": "Sort:",
+        "grid.sort_name": "Name",
+        "grid.sort_date": "Date (newest)",
     },
     "ru": {
         "lang.label": "Язык",
@@ -377,6 +444,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "tab.pixiv_preview": "Превью Pixiv",
         "tab.video": "Видео",
         "tab.pixiv_censor": "Pixiv цензура",
+        "tab.art_checker": "Проверка артов",
         "common.browse": "Обзор…",
         "common.content_suite": "ContentSuite",
         "common.add": "Добавить…",
@@ -401,6 +469,69 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.not_selected": "(не выбран)",
         "folder.placeholder": "Выберите папку…",
         "folder.dialog": "Выбор папки — {label}",
+        "file.placeholder": "Выберите файл…",
+        "file.dialog": "Выбор файла — {label}",
+        "file.filter_json": "JSON (*.json);;Все (*.*)",
+        "art_checker.json": "Книга промптов (JSON):",
+        "art_checker.scan_folder": "Папка для сканирования:",
+        "art_checker.refresh": "Обновить",
+        "art_checker.auto_watch": "Следить за папкой",
+        "art_checker.auto_watch_tip": (
+            "Автоматически пересканировать при добавлении, удалении или переименовании файлов."
+        ),
+        "art_checker.filter": "Фильтр:",
+        "art_checker.sort": "Сортировка:",
+        "art_checker.sort_name": "По имени",
+        "art_checker.sort_date": "По дате (новые)",
+        "art_checker.sort_missing_first": "Missing сверху",
+        "art_checker.search": "Поиск:",
+        "art_checker.copy_name": "Копировать имя",
+        "art_checker.copy_missing": "Копировать все missing",
+        "art_checker.extra_group": "Лишние файлы (нет в JSON)",
+        "art_checker.arts_group": "Арты",
+        "art_checker.col_index": "#",
+        "art_checker.col_status": "Статус",
+        "art_checker.col_section": "Секция",
+        "art_checker.col_name": "Имя",
+        "art_checker.col_files": "Найденные файлы",
+        "art_checker.filter_all": "Все",
+        "art_checker.filter_missing": "Missing",
+        "art_checker.filter_present": "Есть",
+        "art_checker.filter_sfw": "sfw",
+        "art_checker.filter_nsfw": "nsfw",
+        "art_checker.filter_sex": "sex",
+        "art_checker.status_present": "OK",
+        "art_checker.status_missing": "MISS",
+        "art_checker.summary_idle": "Выберите JSON и папку, затем нажмите «Обновить».",
+        "art_checker.summary": (
+            "JSON: {total} артов · уникальных файлов: {files} · "
+            "есть: {present} · нет: {missing} · лишних: {extra}"
+        ),
+        "art_checker.extra_none": "Лишних файлов нет.",
+        "art_checker.extra_more": "\n… и ещё {count}",
+        "art_checker.preview_idle": "Выберите арт для превью.",
+        "art_checker.preview_missing": "Нет: {name}\nОжидалось: {path}",
+        "art_checker.preview_missing_file": "Файл указан в скане, но не найден на диске.",
+        "art_checker.preview_load_error": "Не удалось загрузить превью.",
+        "art_checker.warn_json": "Выберите корректный JSON с промптами.",
+        "art_checker.scan_done": (
+            "Скан готов — есть: {present}, нет: {missing}, лишних: {extra}"
+        ),
+        "art_checker.copied_one": "Скопировано: {name}",
+        "art_checker.copied_missing": "Скопировано имён (missing): {count}",
+        "art_checker.grid_hint": (
+            "Клик — выбрать · двойной клик — копировать имя · наведение — превью · "
+            "колёсико на стопке — листать варианты"
+        ),
+        "art_checker.variants_wheel": (
+            "{current}/{count} вариантов — крути колёсико"
+        ),
+        "art_checker.grid_empty": "Нет артов для отображения.",
+        "art_checker.grid_count": "{count} артов · OK: {present} · MISS: {missing}",
+        "art_checker.grid_count_selected": (
+            "{count} артов · OK: {present} · MISS: {missing} · выбрано: {selected}"
+        ),
+        "art_checker.tile_missing": "НЕТ",
         "images.input": "Вход (изображения):",
         "images.output": "Выход (изображения):",
         "images.group_compress": "Сжатие изображений",
@@ -732,6 +863,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
             "Превью: наведение · выбор: клик (один) · Ctrl+клик (добавить/убрать) · "
             "Shift+клик (диапазон)"
         ),
+        "grid.sort": "Сортировка:",
+        "grid.sort_name": "По имени",
+        "grid.sort_date": "По дате (новые)",
     },
     "ja": {
         "lang.label": "言語",
@@ -745,6 +879,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "tab.pixiv_preview": "Pixivプレビュー",
         "tab.video": "動画",
         "tab.pixiv_censor": "Pixivモザイク",
+        "tab.art_checker": "作品チェック",
         "common.browse": "参照…",
         "common.content_suite": "ContentSuite",
         "common.add": "追加…",
@@ -769,6 +904,69 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "common.not_selected": "（未選択）",
         "folder.placeholder": "フォルダを選択…",
         "folder.dialog": "フォルダ選択 — {label}",
+        "file.placeholder": "ファイルを選択…",
+        "file.dialog": "ファイル選択 — {label}",
+        "file.filter_json": "JSON (*.json);;すべて (*.*)",
+        "art_checker.json": "プロンプト JSON:",
+        "art_checker.scan_folder": "スキャン先フォルダ:",
+        "art_checker.refresh": "更新",
+        "art_checker.auto_watch": "フォルダの変更を監視",
+        "art_checker.auto_watch_tip": (
+            "スキャン先フォルダでファイルの追加・削除・名前変更があったら自動で再スキャンします。"
+        ),
+        "art_checker.filter": "フィルター:",
+        "art_checker.sort": "並べ替え:",
+        "art_checker.sort_name": "名前",
+        "art_checker.sort_date": "日付（新しい順）",
+        "art_checker.sort_missing_first": "不足を先に",
+        "art_checker.search": "検索:",
+        "art_checker.copy_name": "選択名をコピー",
+        "art_checker.copy_missing": "不足分をすべてコピー",
+        "art_checker.extra_group": "余分なファイル（JSONにない）",
+        "art_checker.arts_group": "作品一覧",
+        "art_checker.col_index": "#",
+        "art_checker.col_status": "状態",
+        "art_checker.col_section": "区分",
+        "art_checker.col_name": "名前",
+        "art_checker.col_files": "見つかったファイル",
+        "art_checker.filter_all": "すべて",
+        "art_checker.filter_missing": "不足",
+        "art_checker.filter_present": "あり",
+        "art_checker.filter_sfw": "sfw",
+        "art_checker.filter_nsfw": "nsfw",
+        "art_checker.filter_sex": "sex",
+        "art_checker.status_present": "OK",
+        "art_checker.status_missing": "MISS",
+        "art_checker.summary_idle": "JSONとフォルダを選び、「更新」を押してください。",
+        "art_checker.summary": (
+            "JSON: {total} 件 · ユニークファイル: {files} · "
+            "あり: {present} · 不足: {missing} · 余分: {extra}"
+        ),
+        "art_checker.extra_none": "余分なファイルはありません。",
+        "art_checker.extra_more": "\n… 他 {count} 件",
+        "art_checker.preview_idle": "作品を選択するとプレビューが表示されます。",
+        "art_checker.preview_missing": "不足: {name}\n想定パス: {path}",
+        "art_checker.preview_missing_file": "スキャン結果にあるがディスク上に見つかりません。",
+        "art_checker.preview_load_error": "プレビューを読み込めませんでした。",
+        "art_checker.warn_json": "有効なプロンプト JSON を選択してください。",
+        "art_checker.scan_done": (
+            "スキャン完了 — あり: {present}, 不足: {missing}, 余分: {extra}"
+        ),
+        "art_checker.copied_one": "コピーしました: {name}",
+        "art_checker.copied_missing": "不足 {count} 件の名前をコピーしました",
+        "art_checker.grid_hint": (
+            "クリックで選択 · ダブルクリックで名前コピー · ホバーでプレビュー · "
+            "重なりタイルでホイール切替"
+        ),
+        "art_checker.variants_wheel": (
+            "{current}/{count} 件 — ホイールで切替"
+        ),
+        "art_checker.grid_empty": "表示する作品がありません。",
+        "art_checker.grid_count": "{count} 件 · OK: {present} · MISS: {missing}",
+        "art_checker.grid_count_selected": (
+            "{count} 件 · OK: {present} · MISS: {missing} · 選択: {selected}"
+        ),
+        "art_checker.tile_missing": "不足",
         "images.input": "入力（画像）:",
         "images.output": "出力（画像）:",
         "images.group_compress": "画像圧縮",
@@ -1087,6 +1285,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
             "プレビュー: ホバー · 選択: クリック（1件） · Ctrl+クリック（追加/解除） · "
             "Shift+クリック（範囲）"
         ),
+        "grid.sort": "並べ替え:",
+        "grid.sort_name": "名前",
+        "grid.sort_date": "日付（新しい順）",
     },
 }
 

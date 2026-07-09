@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from core.compress import PackSummary, collect_images, default_worker_count, process_pack
+from core.media_scan import sort_media_paths
 from core.config_store import ConfigStore
 from core.i18n import I18n, tr
 from core.pdf_export import PdfExportResult, export_folder_to_pdf
@@ -238,8 +239,12 @@ class ImagesTab(BaseTab):
 
         # --- Image grid ---
         self.image_grid = ImageGrid()
+        self.image_grid.set_sort_mode(
+            str(config.get("image_sort", "name") or "name")
+        )
         self.image_grid.selection_changed.connect(self._update_buttons)
         self.image_grid.load_finished.connect(self._on_images_loaded)
+        self.image_grid.sort_changed.connect(self._on_image_sort_changed)
 
         row_actions = QHBoxLayout()
         row_actions.addWidget(self.process_btn)
@@ -360,10 +365,17 @@ class ImagesTab(BaseTab):
         if not busy:
             self._update_buttons()
 
+    def _on_image_sort_changed(self) -> None:
+        self.config.set("image_sort", self.image_grid.sort_mode())
+        self._refresh_image_list()
+
+    def _sorted_sources(self) -> list[Path]:
+        return sort_media_paths(self._sources(), self.image_grid.sort_mode())
+
     def _refresh_image_list(self, _path: str = "") -> None:
         if self._is_busy():
             return
-        self.image_grid.set_sources(self._sources())
+        self.image_grid.set_sources(self._sorted_sources())
         self._update_buttons()
 
     def _on_images_loaded(self, _count: int) -> None:

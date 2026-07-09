@@ -17,6 +17,17 @@ Manual run: **Actions → Release build → Run workflow**.
 
 Match `core/credits.py` → `APP_VERSION` when bumping versions.
 
+## Changelog (highlights)
+
+### v1.1.3
+- **Art Checker** tab — prompt JSON vs output folder, OK/MISS grid, folder watch, duplicate-file variants (wheel on hover)
+- Unified **tile selection** styling on Images, Video, Pixiv Censor, and Art Checker grids
+- **Images** grid sort by name or date (newest)
+
+### v1.1.2
+- MP4 mobile playback fixes (`yuv420p`, `faststart`, safe remux/re-encode)
+- Reliable batch encode via temp file + validation before move
+
 ## Build (Windows, local)
 
 Requirements on the build machine: Python 3.11+, same as development.

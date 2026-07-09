@@ -8,6 +8,7 @@ from PySide6.QtCore import QEvent, QPoint, QRect, QSize, Qt, QThread, QTimer, Si
 from PySide6.QtGui import QCursor, QFontMetrics, QImageReader, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
+    QComboBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -21,6 +22,7 @@ from PySide6.QtWidgets import (
 from core.app_log import get_logger
 from core.i18n import I18n, tr
 from ui.preview_placement import compute_hover_preview_layout, media_aspect
+from ui.tile_style import apply_tile_selection_style
 from core.compress import (
     ImageProbe,
     extract_image_thumbnail,
@@ -263,10 +265,10 @@ class ImageTile(QFrame):
 
         self.name_label = QLabel(_elide(path.name, tile_width - 8))
         self.name_label.setToolTip(str(path))
-        self.name_label.setStyleSheet("color: #222; font-size: 11px;")
+        self.name_label.setStyleSheet("font-size: 11px;")
 
         self.meta_label = QLabel()
-        self.meta_label.setStyleSheet("color: #888; font-size: 10px;")
+        self.meta_label.setStyleSheet("font-size: 10px;")
         self._meta_state = "loading"
 
         root.addWidget(self.thumb_wrap)
@@ -339,16 +341,12 @@ class ImageTile(QFrame):
         self.thumb_label.setText("")
 
     def _apply_style(self) -> None:
-        if self._selected:
-            border = "2px solid #2563eb"
-            bg = "#eff6ff"
-        else:
-            border = "2px solid transparent"
-            bg = "transparent"
-        self.setStyleSheet(
-            f"ImageTile {{ background: {bg}; border: {border}; border-radius: 10px; "
-            f"padding: 4px; }}"
-            "ImageTile:hover { border: 2px solid #94a3b8; }"
+        apply_tile_selection_style(
+            self,
+            selected=self._selected,
+            name_label=self.name_label,
+            meta_label=self.meta_label,
+            class_name="ImageTile",
         )
         self.check_badge.move(6, 6)
 
@@ -369,6 +367,7 @@ class ImageTile(QFrame):
 class ImageGrid(QWidget):
     selection_changed = Signal()
     load_finished = Signal(int)
+    sort_changed = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -403,9 +402,18 @@ class ImageGrid(QWidget):
         self.clear_sel_btn.clicked.connect(self.clear_selection)
         self.count_label = QLabel()
         self.count_label.setStyleSheet("color: #666;")
+        self._lbl_sort = QLabel()
+        self.sort_combo = QComboBox()
+        self.sort_combo.setMinimumWidth(130)
+        for key in ("name", "date"):
+            self.sort_combo.addItem("", key)
+        self.sort_combo.currentIndexChanged.connect(self._emit_sort_changed)
+
         toolbar.addWidget(self.select_all_btn)
         toolbar.addWidget(self.clear_sel_btn)
         toolbar.addStretch()
+        toolbar.addWidget(self._lbl_sort)
+        toolbar.addWidget(self.sort_combo)
         toolbar.addWidget(self.count_label)
 
         self._grid_host = QWidget()
@@ -454,9 +462,23 @@ class ImageGrid(QWidget):
         if not self._is_host_window_active():
             self.stop_preview()
 
+    def _emit_sort_changed(self) -> None:
+        self.sort_changed.emit()
+
+    def sort_mode(self) -> str:
+        return self.sort_combo.currentData() or "name"
+
+    def set_sort_mode(self, mode: str) -> None:
+        idx = self.sort_combo.findData(mode)
+        if idx >= 0:
+            self.sort_combo.setCurrentIndex(idx)
+
     def retranslate_ui(self) -> None:
         self.select_all_btn.setText(tr("grid.select_all"))
         self.clear_sel_btn.setText(tr("grid.clear_selection"))
+        self._lbl_sort.setText(tr("grid.sort"))
+        for index, key in enumerate(("name", "date")):
+            self.sort_combo.setItemText(index, tr(f"grid.sort_{key}"))
         self._hint_label.setText(tr("grid.hint"))
         self._preview.retranslate_ui()
         for tile in self._tiles.values():

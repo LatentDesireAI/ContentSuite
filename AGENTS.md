@@ -13,6 +13,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `tabs/pixiv_preview_tab.py` — Pixiv collage cover (up to 3 artworks)
 - `tabs/video_tab.py` — video: watermark, convert, GIF, ugoira, compression level UI
 - `tabs/pixiv_censor_tab.py` — Pixiv censor export (video + images, lasso zones)
+- `tabs/art_checker_tab.py` — Art Checker: JSON vs output folder, watch, copy names
 - `core/pixiv_preview.py` — collage layouts on white background
 - `core/compress.py` — image compression, metadata stripping, optional original filenames
 - `core/pdf_export.py` — multi-page PDF via Pillow
@@ -24,6 +25,10 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `ui/image_grid.py` — image tile grid with hover preview
 - `ui/clip_grid.py` — video clip grid with hover preview (QMediaPlayer)
 - `ui/censor_media_grid.py` — mixed video + image grid for Pixiv censor tab
+- `ui/art_checker_grid.py` — art checker tile grid (OK/MISS, variants, filter/sort)
+- `ui/tile_style.py` — shared selected/unselected tile colors for all preview grids
+- `ui/file_picker.py` — reusable path picker row (JSON/folder fields)
+- `core/art_checker.py` — scan JSON arts against folder, sort/filter helpers
 - `ui/censor_editor_dialog.py` — lasso zone editor (video frame or still image)
 - `core/censor.py` — mosaic zones (polygon lasso + legacy rect), video/image export
 - `ui/language_selector.py` — language switcher in toolbar
@@ -61,6 +66,9 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - [x] i18n: EN / RU / JA with toolbar language selector
 - [x] Image grid hover preview with active-window guard
 - [x] Optional keep-original-filename on image export
+- [x] Art Checker tab: JSON scan, OK/MISS grid, folder watch, variant wheel, filter/sort
+- [x] Unified tile selection styling across image, clip, censor, and art checker grids
+- [x] Images tab: grid sort by name or date (newest)
 
 ## Watermark details
 - Position is in % of frame (0.0–1.0 on X/Y), not pixels — works at any resolution.

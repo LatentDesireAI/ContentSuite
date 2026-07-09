@@ -50,3 +50,19 @@ def collect_media_files(
         files.append(path)
 
     return sorted(files, key=lambda p: str(p.relative_to(root)).lower())
+
+
+def media_file_mtime(path: Path) -> float:
+    try:
+        return path.stat().st_mtime if path.is_file() else 0.0
+    except OSError:
+        return 0.0
+
+
+def sort_media_paths(paths: list[Path], mode: str) -> list[Path]:
+    if mode == "date":
+        return sorted(
+            paths,
+            key=lambda path: (-media_file_mtime(path), path.name.lower()),
+        )
+    return sorted(paths, key=lambda path: path.name.lower())

@@ -27,6 +27,7 @@ The UI is fully translated — switch anytime from the **Language** menu in the 
 - Metadata stripping (including ComfyUI / A1111 prompt chunks)
 - Multi-page PDF export
 - Grid selection for partial batches
+- Sort tiles by **name** or **date (newest)** on the grid toolbar
 - Optional original filenames on export
 
 ### Pixiv Preview
@@ -48,6 +49,19 @@ The UI is fully translated — switch anytime from the **Language** menu in the 
 - **Multi-file editor** — Ctrl+click to select several files, ←/→ to set zones on each
 - Export to `pixiv/` as `name_1.mp4`, `name_2.jpg`, … (shared pack prefix)
 - Adjustable mosaic pixel size (typical 12–24 for Pixiv)
+
+### Art Checker
+- Compare a **prompt-book JSON** (`arts` / `characters` / `prompts`) against a render output folder
+- Tile grid with **OK / MISS** status, hover preview, copy art names (double-click copies the JSON **name**, not the file variant)
+- **Duplicate renders** — stack badge when several files match one art (`name`, `name_2`, …); scroll the mouse wheel on hover to cycle variants
+- Filter by status or section; sort by **name**, **date**, or **missing first**
+- **Watch folder** — auto re-scan when files are added or removed outside the app
+- Planned: dedicated **ComfyUI nodes** for reading and driving the same JSON workflow from graphs
+
+### Media grids
+Shared across **Images**, **Video**, **Pixiv Censor**, and **Art Checker**:
+- **Selection styling** — selected tile: white background and dark filename; unselected: dark background and white filename (actual file name on the tile)
+- Hover preview beside the grid (images, clips, censor media, art checker tiles)
 
 Settings (folders, watermarks, image/video quality, compression level, author EXIF) are stored in:
 
@@ -73,6 +87,10 @@ Optional visual walkthrough — SFW demo art only.
 **Video** — settings and clip grid. Watermark, GIF, convert, compression presets, and ugoira options on the left; clip thumbnails with hover preview on the right.
 
 ![Video tab — settings and clip grid](img/Video_menu.jpg)
+
+**Art Checker** — prompt JSON vs output folder. Left: JSON path, scan folder, search; right: tile grid with OK/MISS badges, filter and sort on the grid toolbar.
+
+![Art Checker tab — JSON scan and tile grid](img/Art%20checker.png)
 
 ## Requirements
 
@@ -139,8 +157,8 @@ If preview still fails, use the grid for selection — all export jobs run throu
 
 ```
 main.py              — application entry point
-tabs/                — UI tabs (images, video, pixiv preview, censor)
-core/                — compression, censor, ffmpeg, watermark, config, PDF
+tabs/                — UI tabs (images, video, pixiv preview, censor, art checker)
+core/                — compression, censor, ffmpeg, watermark, art checker, config, PDF
 ui/                  — grids, censor editor, dialogs, pickers
 ```
 

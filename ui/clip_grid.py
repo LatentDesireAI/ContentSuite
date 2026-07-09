@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 from core.app_log import get_logger
 from core.i18n import I18n, tr
 from ui.preview_placement import compute_hover_preview_layout, media_aspect
+from ui.tile_style import apply_tile_selection_style
 from core.ffmpeg_wrapper import (
     FfmpegError,
     VideoProbe,
@@ -253,10 +254,10 @@ class ClipTile(QFrame):
 
         self.name_label = QLabel(_elide(path.name, tile_width - 8))
         self.name_label.setToolTip(str(path))
-        self.name_label.setStyleSheet("color: #222; font-size: 11px;")
+        self.name_label.setStyleSheet("font-size: 11px;")
 
         self.meta_label = QLabel()
-        self.meta_label.setStyleSheet("color: #888; font-size: 10px;")
+        self.meta_label.setStyleSheet("font-size: 10px;")
         self._meta_state = "loading"
 
         root.addWidget(self.thumb_wrap)
@@ -343,15 +344,12 @@ class ClipTile(QFrame):
         self.thumb_label.setText("")
 
     def _apply_style(self) -> None:
-        if self._selected:
-            border = "2px solid #2563eb"
-            bg = "#eff6ff"
-        else:
-            border = "2px solid transparent"
-            bg = "transparent"
-        self.setStyleSheet(
-            f"ClipTile {{ background: {bg}; border: {border}; border-radius: 10px; padding: 4px; }}"
-            "ClipTile:hover { border: 2px solid #94a3b8; }"
+        apply_tile_selection_style(
+            self,
+            selected=self._selected,
+            name_label=self.name_label,
+            meta_label=self.meta_label,
+            class_name="ClipTile",
         )
         self.check_badge.move(6, 6)
 

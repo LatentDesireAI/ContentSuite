@@ -35,6 +35,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "image_max_res": 2560,
     "image_workers": 0,
     "image_keep_original_name": False,
+    "image_sort": "name",
     "ui_language": "en",
     "gif_fps": 24,
     "gif_width": 720,
@@ -73,6 +74,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "pixiv_crop_fill": True,
     "pixiv_frame_width": 4,
     "pixiv_frame_color": "#2d2d2d",
+    "art_checker_json_path": "",
+    "art_checker_scan_folder": "",
+    "art_checker_auto_watch": True,
+    "art_checker_filter": "all",
+    "art_checker_sort": "name",
 }
 
 

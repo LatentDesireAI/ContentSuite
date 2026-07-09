@@ -39,6 +39,7 @@ from core.ffmpeg_wrapper import (
 from core.i18n import I18n, tr
 from ui.clip_grid import HoverPreviewPopup, _calc_grid_metrics, _elide
 from ui.image_grid import ImageHoverPreviewPopup
+from ui.tile_style import apply_tile_selection_style
 
 TILE_MIN_WIDTH = 148
 TILE_MAX_WIDTH = 320
@@ -151,10 +152,10 @@ class MediaTile(QFrame):
 
         self.name_label = QLabel(_elide(data.path.name, tile_width - 8))
         self.name_label.setToolTip(str(data.path))
-        self.name_label.setStyleSheet("color: #222; font-size: 11px;")
+        self.name_label.setStyleSheet("font-size: 11px;")
 
         self.meta_label = QLabel()
-        self.meta_label.setStyleSheet("color: #888; font-size: 10px;")
+        self.meta_label.setStyleSheet("font-size: 10px;")
         self.meta_label.setText(tr("grid.loading"))
 
         root.addWidget(self.thumb_wrap)
@@ -251,16 +252,12 @@ class MediaTile(QFrame):
         self.thumb_label.setText("")
 
     def _apply_style(self) -> None:
-        if self._selected:
-            border = "2px solid #2563eb"
-            bg = "#eff6ff"
-        else:
-            border = "2px solid transparent"
-            bg = "transparent"
-        self.setStyleSheet(
-            f"MediaTile {{ background: {bg}; border: {border}; border-radius: 10px; "
-            f"padding: 4px; }}"
-            "MediaTile:hover { border: 2px solid #94a3b8; }"
+        apply_tile_selection_style(
+            self,
+            selected=self._selected,
+            name_label=self.name_label,
+            meta_label=self.meta_label,
+            class_name="MediaTile",
         )
         self.check_badge.move(6, 6)
 
