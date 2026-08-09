@@ -29,6 +29,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `ui/tile_style.py` — shared selected/unselected tile colors for all preview grids
 - `ui/file_picker.py` — reusable path picker row (JSON/folder fields)
 - `core/art_checker.py` — scan JSON arts against folder, sort/filter helpers
+- `core/art_checker_trash.py` — session trash (`app_data_dir()/tmp`), cleared on startup
 - `ui/censor_editor_dialog.py` — lasso zone editor (video frame or still image)
 - `core/censor.py` — mosaic zones (polygon lasso + legacy rect), video/image export
 - `ui/language_selector.py` — language switcher in toolbar
@@ -66,7 +67,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - [x] i18n: EN / RU / JA with toolbar language selector
 - [x] Image grid hover preview with active-window guard
 - [x] Optional keep-original-filename on image export
-- [x] Art Checker tab: JSON scan, OK/MISS grid, folder watch, variant wheel, filter/sort
+- [x] Art Checker tab: JSON scan, OK/MISS grid, folder watch, variant wheel, filter/sort, Del → session trash
 - [x] Unified tile selection styling across image, clip, censor, and art checker grids
 - [x] Images tab: grid sort by name or date (newest)
 
@@ -74,6 +75,12 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - Position is in % of frame (0.0–1.0 on X/Y), not pixels — works at any resolution.
 - Opacity: alpha 0–100, applied via ffmpeg `overlay` + `colorchannelmixer` or Pillow alpha paste.
 - Watermark file list is stored as paths in config; UI uses dropdown + “Add…”.
+
+## Art Checker
+- JSON path + scan folder; `scan_arts` maps file stems (`name`, `name_2`, …) to JSON art names.
+- Grid: OK/MISS badges, hover preview, wheel cycles duplicate renders, double-click copies JSON **name**.
+- **Del** — `move_to_trash()` moves the hovered (or selected) variant out of the scan folder into `%APPDATA%/ContentSuite/tmp` (Linux: `~/.config/ContentSuite/tmp`). Folder is wiped on each app start (`reset_trash_on_startup` in `main.py`).
+- Folder watch debounces rescans; filter/sort persisted as `art_checker_filter`, `art_checker_sort`.
 
 ## Pixiv censor
 - Input folder: videos and images together (`collect_censor_media` — videos first, then images).

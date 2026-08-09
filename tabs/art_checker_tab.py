@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QFileSystemWatcher
-from PySide6.QtGui import QClipboard
+from PySide6.QtGui import QClipboard, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from core.app_log import get_logger
 from core.art_checker import ArtRow, ArtScanResult, scan_arts, sort_art_rows
+from core.art_checker_trash import move_to_trash
 from core.config_store import ConfigStore
 from core.i18n import I18n, tr
 from ui.art_checker_grid import ArtCheckerGrid, ArtGridItem
@@ -124,8 +125,14 @@ class ArtCheckerTab(QWidget):
         self.art_grid.copy_requested.connect(self._copy_row_name)
         self.art_grid.filter_changed.connect(self._on_filter_changed)
         self.art_grid.sort_changed.connect(self._on_sort_changed)
+        self.art_grid.file_trash_requested.connect(self._trash_variant_file)
         arts_group_layout.addWidget(self.art_grid)
         arts_layout.addWidget(self._arts_group)
+
+        self._delete_shortcut = QShortcut(QKeySequence.StandardKey.Delete, self)
+        self._delete_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._delete_shortcut.activated.connect(self._on_delete_shortcut)
+        self._delete_shortcut.setEnabled(False)
 
         splitter.addWidget(controls)
         splitter.addWidget(arts_panel)
@@ -141,6 +148,14 @@ class ArtCheckerTab(QWidget):
         self._update_watch_paths()
         if self.json_picker.path() and self.folder_picker.path():
             self._run_scan()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self._delete_shortcut.setEnabled(True)
+
+    def hideEvent(self, event) -> None:
+        self._delete_shortcut.setEnabled(False)
+        super().hideEvent(event)
 
     def retranslate_ui(self) -> None:
         self.refresh_btn.setText(tr("art_checker.refresh"))
@@ -345,3 +360,57 @@ class ArtCheckerTab(QWidget):
             return
         text = "\n".join(row.name for row in self._result.missing if row.name)
         self._copy_text(text, "art_checker.copied_missing", count=len(self._result.missing))
+
+    def _on_delete_shortcut(self) -> None:
+        if not self.isVisible():
+            return
+        if not self.art_grid.request_trash_current_variant():
+            self.log(tr("art_checker.trash_none"))
+
+    def _trash_variant_file(self, tile, file_path: Path) -> None:
+        if not file_path.is_file():
+            self.log(tr("art_checker.trash_failed", name=file_path.name, error="not found"))
+            return
+        try:
+            move_to_trash(file_path)
+        except OSError as exc:
+            QMessageBox.warning(
+                self,
+                tr("common.content_suite"),
+                tr("art_checker.trash_failed", name=file_path.name, error=str(exc)),
+            )
+            get_logger().exception("Art checker trash failed for %s", file_path)
+            return
+
+        rel_path = ""
+        if self._scan_root.is_dir():
+            try:
+                rel_path = str(file_path.relative_to(self._scan_root))
+            except ValueError:
+                rel_path = file_path.name
+
+        self._apply_trashed_file(tile.item.row.index, rel_path)
+        tile.remove_current_file()
+        self.art_grid.stop_preview()
+        self._refresh_summary()
+        self._refresh_extra()
+        self.art_grid.refresh_counts()
+        self.log(tr("art_checker.trashed_one", name=file_path.name))
+
+    def _apply_trashed_file(self, row_index: int, rel_path: str) -> None:
+        if not self._result or not rel_path:
+            return
+        for row in self._result.all_arts:
+            if row.index != row_index:
+                continue
+            had_files = bool(row.files)
+            if rel_path in row.files:
+                row.files.remove(rel_path)
+            if had_files and not row.files:
+                row.status = "missing"
+                self._result.present_count -= 1
+                self._result.missing_count += 1
+                self._result.total_files_unique -= 1
+            break
+        if rel_path in self._result.extra_files_not_in_json:
+            self._result.extra_files_not_in_json.remove(rel_path)

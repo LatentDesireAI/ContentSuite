@@ -19,6 +19,9 @@ Match `core/credits.py` → `APP_VERSION` when bumping versions.
 
 ## Changelog (highlights)
 
+### Unreleased
+- **Art Checker** — **Del** moves the hovered or selected file variant to session trash (`tmp/` in app data); folder cleared on each launch
+
 ### v1.1.3
 - **Art Checker** tab — prompt JSON vs output folder, OK/MISS grid, folder watch, duplicate-file variants (wheel on hover)
 - Unified **tile selection** styling on Images, Video, Pixiv Censor, and Art Checker grids

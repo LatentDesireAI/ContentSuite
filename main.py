@@ -14,6 +14,7 @@ from core.config_store import ConfigStore
 from core.branding import apply_windows_app_identity, load_app_icon
 from core.credits import AI_ASSISTED_LABEL
 from core.i18n import I18n, init_language, tr
+from core.art_checker_trash import reset_trash_on_startup
 from core.thumb_cache import prune_all_thumbnail_caches
 from tabs.art_checker_tab import ArtCheckerTab
 from tabs.images_tab import ImagesTab
@@ -119,6 +120,7 @@ class MainWindow(QMainWindow):
 def main() -> int:
     log = setup_app_logging()
     install_qt_message_handler()
+    reset_trash_on_startup()
     prune_summary = prune_all_thumbnail_caches()
     if prune_summary.deleted_files:
         log.info(

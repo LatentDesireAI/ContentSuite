@@ -341,6 +341,24 @@ class ArtTile(QFrame):
         self.variant_changed.emit(self)
         return True
 
+    def remove_current_file(self) -> Path | None:
+        if not self._file_paths:
+            return None
+        removed = self._file_paths.pop(self._file_index)
+        self._variant_cache.pop(removed, None)
+        if not self._file_paths:
+            self._file_index = 0
+            self.probe = None
+            self._thumb_path = ""
+            self._show_missing_placeholder()
+            self._apply_status_badge()
+            self._update_stack_badge()
+            return removed
+        if self._file_index >= len(self._file_paths):
+            self._file_index = len(self._file_paths) - 1
+        self._apply_current_variant()
+        return removed
+
     def retranslate_meta(self) -> None:
         if not self._file_paths:
             self._show_missing_placeholder()
@@ -433,6 +451,7 @@ class ArtTile(QFrame):
 class ArtCheckerGrid(QWidget):
     selection_changed = Signal()
     copy_requested = Signal(object)
+    file_trash_requested = Signal(object, object)
     load_finished = Signal(int)
     filter_changed = Signal()
     sort_changed = Signal()
@@ -810,8 +829,27 @@ class ArtCheckerGrid(QWidget):
         rows = self.selected_rows()
         return rows[0] if rows else None
 
+    def tile_for_trash(self) -> ArtTile | None:
+        if self._hover_tile is not None and self._hover_tile.path is not None:
+            return self._hover_tile
+        for key in self._order:
+            tile = self._tiles.get(key)
+            if tile is not None and tile.is_selected() and tile.path is not None:
+                return tile
+        return None
+
+    def request_trash_current_variant(self) -> bool:
+        tile = self.tile_for_trash()
+        if tile is None or tile.path is None:
+            return False
+        self.file_trash_requested.emit(tile, tile.path)
+        return True
+
     def has_items(self) -> bool:
         return bool(self._tiles)
+
+    def refresh_counts(self) -> None:
+        self._update_count_label()
 
     def _update_count_label(self) -> None:
         count = len(self._tiles)
