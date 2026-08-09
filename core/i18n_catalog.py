@@ -92,8 +92,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "art_checker.copied_missing": "Copied {count} missing name(s)",
         "art_checker.grid_hint": (
             "Click to select · double-click to copy name · hover for preview · "
-            "scroll wheel on stacked tiles to browse variants"
+            "scroll wheel on stacked tiles to browse variants · Del to move file to session trash"
         ),
+        "art_checker.trashed_one": "Moved to trash: {name}",
+        "art_checker.trash_failed": "Could not move to trash: {name} — {error}",
+        "art_checker.trash_none": "Nothing to trash — hover a tile with a file or select one, then press Del",
         "art_checker.variants_wheel": (
             "{current}/{count} variants — scroll wheel to browse"
         ),
@@ -211,6 +214,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.compress.minimal": "Minimal",
         "video.compress.minimal_hint": "Highest quality, largest file — virtually no visible loss",
         "video.keep_audio": "Keep audio",
+        "video.fix_audio_head": "Fix audio click at clip start",
+        "video.fix_audio_head_tip": (
+            "AI video models with audio often emit a short click (\"t..\", \"ts..\") in the "
+            "first ~0.4 s. Each clip is checked, and the start is faded in only when the "
+            "burst is followed by silence. Clips that really begin with sound stay untouched, "
+            "and timing never shifts, so lip sync is preserved.\n"
+            "Applies to Watermark and Convert."
+        ),
         "video.remove_meta": "Remove metadata",
         "video.reencode": "Re-encode video (slower)",
         "video.parallel_tasks": "Parallel tasks:",
@@ -389,6 +400,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.images.pdf_done_log": "PDF ready: {name} | {pages} page(s), {size:.1f} MB",
         "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
         "log.video.item_err": "[{cur}/{total}] {name} — error: {error}",
+        "log.video.audio_head_fixed": " | start click muted: {ms} ms",
         "log.video.watermark_start": (
             "Watermark: {file} | height={height}%, alpha={alpha}%, compression={compression}"
         ),
@@ -521,7 +533,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "art_checker.copied_missing": "Скопировано имён (missing): {count}",
         "art_checker.grid_hint": (
             "Клик — выбрать · двойной клик — копировать имя · наведение — превью · "
-            "колёсико на стопке — листать варианты"
+            "колёсико на стопке — листать варианты · Del — в корзину сессии"
+        ),
+        "art_checker.trashed_one": "В корзину: {name}",
+        "art_checker.trash_failed": "Не удалось переместить в корзину: {name} — {error}",
+        "art_checker.trash_none": (
+            "Нечего удалять — наведите на плитку с файлом или выберите её, затем Del"
         ),
         "art_checker.variants_wheel": (
             "{current}/{count} вариантов — крути колёсико"
@@ -640,6 +657,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.compress.minimal": "Минимальное",
         "video.compress.minimal_hint": "Максимальное качество, крупный файл — практически без видимых потерь",
         "video.keep_audio": "Сохранить звук",
+        "video.fix_audio_head": "Убрать щелчок в начале звука",
+        "video.fix_audio_head_tip": (
+            "ИИ-модели видео со звуком часто выдают короткий щелчок («т..», «ц..») "
+            "в первые ~0.4 с. Каждый ролик проверяется, и начало приглушается только "
+            "если после всплеска идёт тишина. Ролики, которые действительно начинаются "
+            "со звука, не трогаются, тайминг не сдвигается — липсинк сохраняется.\n"
+            "Работает при наложении вотермарки и конвертации."
+        ),
         "video.remove_meta": "Удалить метаданные",
         "video.reencode": "Перекодировать видео (медленнее)",
         "video.parallel_tasks": "Параллельных задач:",
@@ -822,6 +847,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.images.pdf_done_log": "PDF готов: {name} | {pages} стр., {size:.1f} MB",
         "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
         "log.video.item_err": "[{cur}/{total}] {name} — ошибка: {error}",
+        "log.video.audio_head_fixed": " | щелчок в начале приглушён: {ms} мс",
         "log.video.watermark_start": (
             "Watermark: {file} | высота={height}%, alpha={alpha}%, сжатие={compression}"
         ),
@@ -956,7 +982,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "art_checker.copied_missing": "不足 {count} 件の名前をコピーしました",
         "art_checker.grid_hint": (
             "クリックで選択 · ダブルクリックで名前コピー · ホバーでプレビュー · "
-            "重なりタイルでホイール切替"
+            "重なりタイルでホイール切替 · Del でセッションごみ箱へ移動"
+        ),
+        "art_checker.trashed_one": "ごみ箱へ移動: {name}",
+        "art_checker.trash_failed": "ごみ箱へ移動できません: {name} — {error}",
+        "art_checker.trash_none": (
+            "移動するファイルがありません — ファイル付きタイルにホバーするか選択して Del"
         ),
         "art_checker.variants_wheel": (
             "{current}/{count} 件 — ホイールで切替"
@@ -1075,6 +1106,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "video.compress.minimal": "最小",
         "video.compress.minimal_hint": "最高画質・大きいファイル — 目に見える劣化ほぼなし",
         "video.keep_audio": "音声を保持",
+        "video.fix_audio_head": "冒頭の音声ノイズを除去",
+        "video.fix_audio_head_tip": (
+            "音声付きAI動画モデルは冒頭0.4秒ほどに短いクリック音を出すことがあります。"
+            "各クリップを解析し、ノイズの後が無音の場合のみ冒頭をフェードインします。"
+            "本当に音で始まるクリップはそのまま、尺もずれないのでリップシンクは保たれます。\n"
+            "ウォーターマークと変換に適用されます。"
+        ),
         "video.remove_meta": "メタデータ削除",
         "video.reencode": "再エンコード（遅い）",
         "video.parallel_tasks": "並列タスク:",
@@ -1245,6 +1283,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "log.images.pdf_done_log": "PDF完了: {name} | {pages} ページ, {size:.1f} MB",
         "log.video.item_ok": "[{cur}/{total}] {prefix} → {out}",
         "log.video.item_err": "[{cur}/{total}] {name} — エラー: {error}",
+        "log.video.audio_head_fixed": " | 冒頭ノイズをミュート: {ms} ms",
         "log.video.watermark_start": (
             "Watermark: {file} | 高さ={height}%, alpha={alpha}%, 圧縮={compression}"
         ),

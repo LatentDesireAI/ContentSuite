@@ -41,6 +41,7 @@ The UI is fully translated — switch anytime from the **Language** menu in the 
 - GIF export
 - Ugoira export (frames + `animation.json`)
 - Clip grid with hover preview and audio
+- **Fix audio click at clip start** — AI video models with sound often emit a short click in the first ~0.4 s; each clip is analysed and the start is faded in only when the burst is followed by a pause, so clips that really begin with sound are left alone and timing never shifts
 - Metadata removal, audio on/off
 
 ### Pixiv Censor
@@ -54,6 +55,7 @@ The UI is fully translated — switch anytime from the **Language** menu in the 
 - Compare a **prompt-book JSON** (`arts` / `characters` / `prompts`) against a render output folder
 - Tile grid with **OK / MISS** status, hover preview, copy art names (double-click copies the JSON **name**, not the file variant)
 - **Duplicate renders** — stack badge when several files match one art (`name`, `name_2`, …); scroll the mouse wheel on hover to cycle variants
+- **Del** — move the hovered or selected file variant to **session trash** (`tmp/` under the app data folder); removed from the scan folder, not deleted permanently; `tmp/` is cleared on every app launch
 - Filter by status or section; sort by **name**, **date**, or **missing first**
 - **Watch folder** — auto re-scan when files are added or removed outside the app
 - Planned: dedicated **ComfyUI nodes** for reading and driving the same JSON workflow from graphs
@@ -70,7 +72,7 @@ Settings (folders, watermarks, image/video quality, compression level, author EX
 | Windows | `%APPDATA%\ContentSuite\config.json` |
 | Linux | `~/.config/ContentSuite/config.json` (or `$XDG_CONFIG_HOME/ContentSuite/`) |
 
-Logs and thumbnail caches live in the same folder.
+Logs, thumbnail caches, and Art Checker session trash (`tmp/`) live in the same folder.
 
 ## Screenshots
 

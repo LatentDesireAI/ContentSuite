@@ -16,6 +16,11 @@ from pathlib import Path
 from typing import Callable
 
 from core.app_log import get_logger
+from core.audio_head_fix import (
+    AudioHeadArtifact,
+    detect_audio_head_artifact,
+    ffmpeg_audio_head_args,
+)
 from core.media_scan import collect_media_files
 from core.metadata import (
     build_ffmpeg_metadata_flags,
@@ -77,6 +82,7 @@ class VideoJobResult:
     success: bool
     message: str = ""
     probe: VideoProbe | None = None
+    audio_head_ms: int | None = None
 
 
 @dataclass
@@ -114,6 +120,11 @@ def _creation_flags() -> int:
     if sys.platform == "win32":
         return subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
     return 0
+
+
+def subprocess_creation_flags() -> int:
+    """Public alias of `_creation_flags` for other core modules spawning ffmpeg."""
+    return _creation_flags()
 
 
 def collect_videos(folder: Path) -> list[Path]:
@@ -344,6 +355,17 @@ def _output_path(
     return output_dir / f"{stem}{ext}"
 
 
+def _audio_args_with_head_fix(
+    output_format: str,
+    audio_head: AudioHeadArtifact | None,
+) -> list[str]:
+    """Audio codec args plus the start-of-clip fade, when the stream is re-encoded."""
+    args = ffmpeg_audio_encode_args(output_format)
+    if "copy" in args:
+        return args
+    return [*args, *ffmpeg_audio_head_args(audio_head)]
+
+
 def _append_video_metadata(
     args: list[str],
     *,
@@ -367,6 +389,7 @@ def apply_watermark(
     compression_level: str = DEFAULT_COMPRESSION_ID,
     author_meta: dict | None = None,
     title: str = "",
+    audio_head: AudioHeadArtifact | None = None,
 ) -> None:
     probe = probe_video(input_path)
     output_format = output_path.suffix.lstrip(".").lower() or "webm"
@@ -378,7 +401,7 @@ def apply_watermark(
         *ffmpeg_video_encode_args(output_format, compression_level),
     ]
     if copy_audio and probe.has_audio:
-        args.extend(ffmpeg_audio_encode_args(output_format))
+        args.extend(_audio_args_with_head_fix(output_format, audio_head))
     else:
         args.append("-an")
     _append_video_metadata(
@@ -457,6 +480,7 @@ def convert_video(
     compression_level: str = DEFAULT_COMPRESSION_ID,
     author_meta: dict | None = None,
     title: str = "",
+    audio_head: AudioHeadArtifact | None = None,
 ) -> None:
     fmt = output_format.lower().lstrip(".")
     probe = probe_video(input_path)
@@ -488,7 +512,7 @@ def convert_video(
 
     if keep_audio and probe.has_audio:
         args.extend(["-map", "0:a?"])
-        args.extend(ffmpeg_audio_encode_args(fmt))
+        args.extend(_audio_args_with_head_fix(fmt, audio_head))
     else:
         args.append("-an")
 
@@ -841,6 +865,16 @@ def _process_one(
     except FfmpegError as exc:
         return VideoJobResult(source, None, False, str(exc))
 
+    audio_head = None
+    if (
+        kwargs.get("fix_audio_head")
+        and probe.has_audio
+        and job in ("watermark", "convert")
+        and kwargs.get("keep_audio", True)
+    ):
+        audio_head = detect_audio_head_artifact(source)
+    head_ms = audio_head.mute_ms if audio_head else None
+
     try:
         output_stem = kwargs.get("output_stem")
 
@@ -862,8 +896,9 @@ def _process_one(
                 ),
                 author_meta=kwargs.get("author_meta"),
                 title=output_stem or source.stem,
+                audio_head=audio_head,
             )
-            return VideoJobResult(source, out, True, probe=probe)
+            return VideoJobResult(source, out, True, probe=probe, audio_head_ms=head_ms)
 
         if job == "gif":
             out = _output_path(source, output_dir, "", ".gif", output_stem=output_stem)
@@ -901,8 +936,9 @@ def _process_one(
                 ),
                 author_meta=kwargs.get("author_meta"),
                 title=output_stem or source.stem,
+                audio_head=audio_head,
             )
-            return VideoJobResult(source, out, True, probe=probe)
+            return VideoJobResult(source, out, True, probe=probe, audio_head_ms=head_ms)
 
         if job == "metadata":
             title = output_stem or source.stem

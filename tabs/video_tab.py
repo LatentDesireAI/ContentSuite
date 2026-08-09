@@ -86,15 +86,18 @@ class VideoBatchWorker(QThread):
                     prefix = result.source.name
                 if result.success:
                     out_name = result.output.name if result.output else "?"
-                    self.log_line.emit(
-                        tr(
-                            "log.video.item_ok",
-                            cur=current,
-                            total=total,
-                            prefix=prefix,
-                            out=out_name,
-                        )
+                    line = tr(
+                        "log.video.item_ok",
+                        cur=current,
+                        total=total,
+                        prefix=prefix,
+                        out=out_name,
                     )
+                    if result.audio_head_ms:
+                        line += tr(
+                            "log.video.audio_head_fixed", ms=result.audio_head_ms
+                        )
+                    self.log_line.emit(line)
                 else:
                     self.log_line.emit(
                         tr(
@@ -365,6 +368,14 @@ class VideoTab(BaseTab):
             lambda v: config.set("video_keep_audio", v)
         )
 
+        self.fix_audio_head_cb = QCheckBox()
+        self.fix_audio_head_cb.setChecked(
+            bool(config.get("video_fix_audio_head", False))
+        )
+        self.fix_audio_head_cb.toggled.connect(
+            lambda v: config.set("video_fix_audio_head", v)
+        )
+
         self.remove_meta_cb = QCheckBox()
         self.remove_meta_cb.setChecked(bool(config.get("video_remove_metadata", True)))
         self.remove_meta_cb.toggled.connect(
@@ -408,6 +419,7 @@ class VideoTab(BaseTab):
         conv_form.addRow(self._lbl_compression, self.compression_combo)
         conv_form.addRow("", self.compression_hint)
         conv_form.addRow("", self.keep_audio_cb)
+        conv_form.addRow("", self.fix_audio_head_cb)
         conv_form.addRow("", self.remove_meta_cb)
         conv_form.addRow("", self.reencode_cb)
         conv_form.addRow(self._lbl_cpu_hint, self.workers_spin)
@@ -618,6 +630,8 @@ class VideoTab(BaseTab):
             )
         self._update_compression_hint()
         self.keep_audio_cb.setText(tr("video.keep_audio"))
+        self.fix_audio_head_cb.setText(tr("video.fix_audio_head"))
+        self.fix_audio_head_cb.setToolTip(tr("video.fix_audio_head_tip"))
         self.remove_meta_cb.setText(tr("video.remove_meta"))
         self.reencode_cb.setText(tr("video.reencode"))
         self._lbl_cpu_hint.setText(tr("video.parallel_tasks"))
@@ -854,6 +868,7 @@ class VideoTab(BaseTab):
         return {
             "remove_metadata": self.remove_meta_cb.isChecked(),
             "author_meta": self.config.get_author_metadata(),
+            "fix_audio_head": self.fix_audio_head_cb.isChecked(),
         }
 
     def _author_log_note(self) -> str:

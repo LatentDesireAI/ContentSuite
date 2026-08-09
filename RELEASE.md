@@ -21,6 +21,7 @@ Match `core/credits.py` → `APP_VERSION` when bumping versions.
 
 ### Unreleased
 - **Art Checker** — **Del** moves the hovered or selected file variant to session trash (`tmp/` in app data); folder cleared on each launch
+- **Video** — optional fix for the audio click AI video models leave in the first ~0.4 s; each clip is analysed and the start is faded in only when the burst is followed by a pause, so clips that really begin with sound are untouched and timing never shifts
 
 ### v1.1.3
 - **Art Checker** tab — prompt JSON vs output folder, OK/MISS grid, folder watch, duplicate-file variants (wheel on hover)

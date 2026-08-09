@@ -19,6 +19,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - `core/pdf_export.py` — multi-page PDF via Pillow
 - `core/watermark.py` — shared watermark logic (position, opacity) for images + video
 - `core/ffmpeg_wrapper.py` — codec probe, convert, GIF, ugoira export
+- `core/audio_head_fix.py` — detects the start-of-clip audio burst in AI-generated video
 - `core/video_compression.py` — CRF presets (x264 / VP9) for re-encode jobs
 - `core/config_store.py` — persistent settings (folders, watermarks, quality)
 - `core/i18n.py` — UI translation manager
@@ -70,6 +71,7 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - [x] Art Checker tab: JSON scan, OK/MISS grid, folder watch, variant wheel, filter/sort, Del → session trash
 - [x] Unified tile selection styling across image, clip, censor, and art checker grids
 - [x] Images tab: grid sort by name or date (newest)
+- [x] Video tab: auto-fix for the audio click at clip start (`video_fix_audio_head`)
 
 ## Watermark details
 - Position is in % of frame (0.0–1.0 on X/Y), not pixels — works at any resolution.
@@ -97,6 +99,19 @@ UI languages: English (default), Russian, Japanese — see `core/i18n.py` and `c
 - Applied when ffmpeg re-encodes: WebM output always; MP4/MOV only with “Re-encode video” checked.
 - Also used by watermark export (VP9 webm) and Pixiv censor export (reads same config key).
 - “Near lossless” / “Minimal” — low CRF (18–14 x264, 22–16 VP9) for space savings with no visible loss.
+
+## Audio head fix (AI clips)
+- Video models with an audio branch (MiniMax H3, LTX-2) emit a short loud click in the first
+  ~0.4 s — garbage in the leading audio latents, not something a prompt can remove.
+- `core/audio_head_fix.py` decodes only the first 1.2 s (mono 16 kHz PCM via ffmpeg pipe) and
+  looks for the signature: a peak within the first 150 ms that drops into a pause of ≥150 ms.
+  Clips that genuinely open with sound keep a loud tail and are returned as clean.
+- The fix is `afade=t=in:st=<burst end>:d=0.06` — the head is silenced, **nothing is cut**, so
+  the timeline never shifts and lip sync survives. Never replace this with a trim.
+- Applied in `apply_watermark` and `convert_video` via the `audio_head=` argument; detection
+  runs once per file in `_process_one`. Skipped when audio is copied (`-c:a copy`) or dropped.
+- UI: checkbox on the Video tab → Convert block, `video_fix_audio_head` in config, default off.
+  Muted length is reported per file in the log via `VideoJobResult.audio_head_ms`.
 
 ## ffmpeg wrapper requirements
 - Before convert: `ffprobe` for input codec/container; wrap all subprocess calls in try/except;
