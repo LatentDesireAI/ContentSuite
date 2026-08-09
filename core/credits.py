@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 APP_NAME = "ContentSuite"
-APP_VERSION = "1.1.3"
+APP_VERSION = "1.1.4"
 
 PRIMARY_AUTHOR = "LatentDesireAI"
 PRIMARY_AUTHOR_URL = "https://github.com/LatentDesireAI"
