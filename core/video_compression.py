@@ -133,6 +133,10 @@ def ffmpeg_video_encode_args(output_format: str, level_id: str) -> list[str]:
             str(preset.vp9_crf),
             "-b:v",
             "0",
+            # libvpx is single-tile by default; row-mt parallelizes across
+            # cores with no quality change.
+            "-row-mt",
+            "1",
         ]
     args = [
         "-c:v",

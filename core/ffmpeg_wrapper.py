@@ -881,8 +881,10 @@ def _process_one(
         if job == "watermark":
             wm_path = kwargs["watermark_path"]
             settings = kwargs["watermark_settings"]
+            # MP4: webm/VP9 output was unplayable on iPhone Safari and the
+            # libvpx encode ran far slower than x264 at the same quality tier.
             out = _output_path(
-                source, output_dir, "_watermark", ".webm", output_stem=output_stem
+                source, output_dir, "_watermark", ".mp4", output_stem=output_stem
             )
             apply_watermark(
                 source,
